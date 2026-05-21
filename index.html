@@ -1,0 +1,2784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IGORUNITY — De 0 a Experto en Unity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #161822;
+  --bg3: #1c1f2e;
+  --bg4: #232638;
+  --panel: #1a1d2e;
+  --border: #2a2d42;
+  --border2: #363a55;
+  --unity: #3ddc84;
+  --unity2: #2cb870;
+  --unity-dim: rgba(61,220,132,0.12);
+  --igor: #7c3aed;
+  --igor2: #6025c4;
+  --igor-dim: rgba(124,58,237,0.15);
+  --gold: #f59e0b;
+  --gold-dim: rgba(245,158,11,0.12);
+  --red: #ef4444;
+  --blue: #38bdf8;
+  --blue-dim: rgba(56,189,248,0.12);
+  --text: #e8eaf0;
+  --text2: #9ca3af;
+  --text3: #6b7280;
+  --mono: 'JetBrains Mono', monospace;
+  --head: 'Rajdhani', sans-serif;
+  --body: 'Inter', sans-serif;
+  --r: 6px;
+  --r2: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── SCANLINE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── GRID BG ── */
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(61,220,132,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61,220,132,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── TOP BAR (Unity-like toolbar) ── */
+.toolbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 48px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  z-index: 100;
+  padding: 0 16px;
+}
+
+.toolbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 20px;
+  border-right: 1px solid var(--border);
+  margin-right: 12px;
+}
+
+.toolbar-logo .cube {
+  width: 28px; height: 28px;
+  position: relative;
+}
+
+.toolbar-logo .cube svg {
+  width: 100%; height: 100%;
+}
+
+.toolbar-logo .name {
+  font-family: var(--head);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+.toolbar-logo .name span { color: var(--unity); }
+
+.toolbar-tabs {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+}
+
+.tab {
+  padding: 6px 16px;
+  font-family: var(--body);
+  font-size: 12px;
+  color: var(--text2);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--r) var(--r) 0 0;
+  transition: all 0.15s;
+  border-bottom: 2px solid transparent;
+}
+
+.tab:hover { color: var(--text); background: var(--bg3); }
+.tab.active { color: var(--unity); border-bottom-color: var(--unity); background: var(--bg3); }
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border);
+}
+
+.xp-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.xp-bar .xp-label { color: var(--gold); font-family: var(--mono); font-size: 11px; }
+.xp-track {
+  width: 100px; height: 6px;
+  background: var(--bg4);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--unity2), var(--unity));
+  border-radius: 3px;
+  width: 0%;
+  transition: width 1s ease;
+}
+
+.igor-pts {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--igor);
+}
+
+/* ── MAIN LAYOUT ── */
+.main-wrapper {
+  display: flex;
+  padding-top: 48px;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR (Hierarchy) ── */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  height: calc(100vh - 48px);
+  position: sticky;
+  top: 48px;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sidebar-header {
+  padding: 10px 14px 8px;
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text3);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-search {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-search input {
+  width: 100%;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text);
+  font-family: var(--body);
+  outline: none;
+}
+.sidebar-search input::placeholder { color: var(--text3); }
+.sidebar-search input:focus { border-color: var(--unity); }
+
+.nav-section {
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--mono);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background 0.1s;
+  user-select: none;
+}
+
+.nav-section-header:hover { background: var(--bg4); }
+
+.nav-section-header .arrow {
+  margin-left: auto;
+  font-size: 9px;
+  transition: transform 0.2s;
+  color: var(--text3);
+}
+
+.nav-section-header.open .arrow { transform: rotate(90deg); }
+
+.nav-section-header .sect-icon {
+  font-size: 14px;
+  width: 18px;
+  text-align: center;
+}
+
+.nav-section-header .sect-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text3);
+  background: var(--bg4);
+  padding: 1px 5px;
+  border-radius: 8px;
+  margin-right: 6px;
+}
+
+.nav-items {
+  display: none;
+  padding: 4px 0;
+}
+.nav-items.open { display: block; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px 5px 28px;
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.1s;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+
+.nav-item:hover {
+  background: var(--bg4);
+  color: var(--text);
+  border-left-color: var(--border2);
+}
+
+.nav-item.active {
+  color: var(--unity);
+  background: var(--unity-dim);
+  border-left-color: var(--unity);
+}
+
+.nav-item .dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--border2);
+  flex-shrink: 0;
+}
+
+.nav-item.done .dot { background: var(--unity); }
+.nav-item.locked { opacity: 0.4; cursor: not-allowed; }
+.nav-item.locked .dot { background: var(--text3); }
+
+/* ── MAIN CONTENT ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── HERO SECTION ── */
+.hero {
+  padding: 60px 64px 48px;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(61,220,132,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--unity-dim);
+  border: 1px solid rgba(61,220,132,0.25);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--unity);
+  margin-bottom: 24px;
+  letter-spacing: 0.5px;
+}
+
+.hero-badge .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--unity);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero h1 {
+  font-family: var(--head);
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.hero h1 .white { color: var(--text); }
+.hero h1 .green { color: var(--unity); }
+.hero h1 .purple { color: var(--igor); }
+
+.hero-sub {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text2);
+  margin-bottom: 32px;
+  letter-spacing: 1px;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 36px;
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-stat .num {
+  font-family: var(--head);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--unity);
+  line-height: 1;
+}
+
+.hero-stat .lbl {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text3);
+  letter-spacing: 0.5px;
+}
+
+.hero-divider {
+  width: 1px; height: 40px;
+  background: var(--border);
+  align-self: center;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-primary {
+  background: var(--unity);
+  color: #0a1a0f;
+  font-family: var(--head);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  background: var(--unity2);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 11px 22px;
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-secondary:hover {
+  border-color: var(--unity);
+  color: var(--unity);
+}
+
+/* ── SECTION TITLE ── */
+.section {
+  padding: 48px 64px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.section-title h2 {
+  font-family: var(--head);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+
+.section-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--unity);
+  background: var(--unity-dim);
+  border: 1px solid rgba(61,220,132,0.2);
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+}
+
+.section-desc {
+  font-size: 14px;
+  color: var(--text2);
+  margin-bottom: 32px;
+  font-family: var(--body);
+  line-height: 1.6;
+}
+
+/* ── TOPICS GRID ── */
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.topic-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  display: block;
+}
+
+.topic-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--accent-color, var(--border));
+  transition: width 0.2s;
+}
+
+.topic-card:hover {
+  border-color: var(--accent-color, var(--border2));
+  background: var(--bg3);
+  transform: translateX(2px);
+}
+
+.topic-card:hover::before { width: 4px; }
+
+.topic-card .tc-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.topic-card .tc-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--r);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  background: var(--icon-bg, var(--bg4));
+}
+
+.topic-card .tc-info { flex: 1; min-width: 0; }
+
+.topic-card .tc-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  margin-bottom: 2px;
+}
+
+.topic-card .tc-title {
+  font-family: var(--head);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.topic-card .tc-desc {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.topic-card .tc-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tc-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+.topic-card .tc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.tc-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.tc-pill {
+  font-size: 10px;
+  font-family: var(--mono);
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+.tc-pill.theory { background: var(--blue-dim); color: var(--blue); }
+.tc-pill.practice { background: var(--igor-dim); color: #a78bfa; }
+.tc-pill.video { background: rgba(239,68,68,0.1); color: #f87171; }
+.tc-pill.project { background: var(--gold-dim); color: var(--gold); }
+.tc-pill.simulator { background: var(--unity-dim); color: var(--unity); }
+
+.tc-lock {
+  font-size: 12px;
+  color: var(--text3);
+}
+
+.tc-check {
+  font-size: 14px;
+  color: var(--unity);
+}
+
+/* NIVEL COLORS */
+.nivel-0 { --accent-color: #38bdf8; --icon-bg: rgba(56,189,248,0.1); }
+.nivel-1 { --accent-color: #a78bfa; --icon-bg: rgba(167,139,250,0.1); }
+.nivel-2 { --accent-color: var(--unity); --icon-bg: var(--unity-dim); }
+.nivel-3 { --accent-color: var(--gold); --icon-bg: var(--gold-dim); }
+.nivel-4 { --accent-color: #f97316; --icon-bg: rgba(249,115,22,0.1); }
+.nivel-5 { --accent-color: #ec4899; --icon-bg: rgba(236,72,153,0.1); }
+.nivel-6 { --accent-color: #ef4444; --icon-bg: rgba(239,68,68,0.1); }
+
+/* ── ROADMAP VISUAL ── */
+.roadmap {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  margin-bottom: 40px;
+}
+
+.roadmap::-webkit-scrollbar { height: 4px; }
+.roadmap::-webkit-scrollbar-track { background: transparent; }
+.roadmap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.rm-block {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.rm-connector {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-top: 22px;
+}
+
+.rm-connector::before {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 2px;
+  background: var(--border);
+}
+
+.rm-node {
+  width: 72px; height: 72px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  border: 2px solid var(--border);
+  background: var(--panel);
+  margin: 0 auto 8px;
+  transition: all 0.2s;
+  cursor: pointer;
+  position: relative;
+}
+
+.rm-node:hover { transform: scale(1.05); }
+
+.rm-node.active {
+  border-color: var(--unity);
+  background: var(--unity-dim);
+  box-shadow: 0 0 20px rgba(61,220,132,0.15);
+}
+
+.rm-node .rm-badge {
+  position: absolute;
+  top: -8px; right: -8px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--unity);
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--mono);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rm-label {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text2);
+  width: 72px;
+}
+
+.rm-count {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  width: 72px;
+}
+
+/* ── VIDEOS SECTION ── */
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.video-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.video-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+.video-thumb {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: var(--bg4);
+  overflow: hidden;
+}
+
+.video-thumb iframe {
+  width: 100%; height: 100%;
+  border: none;
+  pointer-events: none;
+}
+
+.video-thumb .play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.4);
+  transition: opacity 0.2s;
+}
+
+.video-card:hover .play-overlay { opacity: 0; }
+
+.play-btn {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(61,220,132,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-btn svg { width: 20px; height: 20px; fill: #000; margin-left: 3px; }
+
+.video-info {
+  padding: 14px 16px;
+}
+
+.video-info .v-module {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--unity);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.video-info .v-title {
+  font-family: var(--head);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.video-info .v-desc {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.4;
+}
+
+/* ── GAMIFICATION SECTION ── */
+.gamification {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.game-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 24px;
+  text-align: center;
+}
+
+.game-card .gc-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.game-card .gc-title {
+  font-family: var(--head);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.game-card .gc-desc {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+/* ── STATS BAR ── */
+.stats-bar {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 64px;
+  display: flex;
+  gap: 0;
+}
+
+.stat-item {
+  flex: 1;
+  text-align: center;
+  padding: 0 20px;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+
+.stat-item .s-num {
+  font-family: var(--head);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--unity);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-item .s-label {
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text3);
+  letter-spacing: 0.5px;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 24px 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+footer .f-logo {
+  font-family: var(--head);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text2);
+}
+footer .f-logo span { color: var(--unity); }
+
+footer .f-text {
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text3);
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  width: 640px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 32px;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 4px 10px;
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 18px;
+  font-family: var(--mono);
+}
+.modal-close:hover { color: var(--text); border-color: var(--border2); }
+
+/* ── PROGRESS INDICATOR ── */
+.progress-ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── MOBILE TOGGLE ── */
+.sidebar-toggle {
+  display: none;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 6px 10px;
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+@media (max-width: 900px) {
+  .sidebar { display: none; width: 0; }
+  .sidebar.open { display: block; position: fixed; top: 48px; left: 0; bottom: 0; z-index: 99; }
+  .sidebar-toggle { display: flex; }
+  .hero, .section { padding: 32px 24px; }
+  .stats-bar { padding: 20px 24px; }
+  footer { padding: 20px 24px; flex-direction: column; gap: 8px; text-align: center; }
+  .hero h1 { font-size: 40px; }
+  .gamification { grid-template-columns: 1fr; }
+  .topics-grid { grid-template-columns: 1fr; }
+}
+
+/* ── SCROLL ANIMATION ── */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── LEVEL BADGE ── */
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 8px;
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border: 1px solid;
+}
+
+.lb-0 { background: rgba(56,189,248,0.1); color: #38bdf8; border-color: rgba(56,189,248,0.25); }
+.lb-1 { background: rgba(167,139,250,0.1); color: #a78bfa; border-color: rgba(167,139,250,0.25); }
+.lb-2 { background: var(--unity-dim); color: var(--unity); border-color: rgba(61,220,132,0.25); }
+.lb-3 { background: var(--gold-dim); color: var(--gold); border-color: rgba(245,158,11,0.25); }
+.lb-4 { background: rgba(249,115,22,0.1); color: #f97316; border-color: rgba(249,115,22,0.25); }
+.lb-5 { background: rgba(236,72,153,0.1); color: #ec4899; border-color: rgba(236,72,153,0.25); }
+.lb-6 { background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.25); }
+
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- ═══════════════ TOOLBAR ═══════════════ -->
+<nav class="toolbar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+  <div class="toolbar-logo">
+    <div class="cube">
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="14,2 26,9 26,21 14,28 2,21 2,9" fill="none" stroke="#3ddc84" stroke-width="1.5"/>
+        <polygon points="14,2 26,9 14,16 2,9" fill="rgba(61,220,132,0.15)" stroke="#3ddc84" stroke-width="1"/>
+        <line x1="14" y1="16" x2="14" y2="28" stroke="#3ddc84" stroke-width="1"/>
+        <line x1="14" y1="16" x2="26" y2="9" stroke="rgba(61,220,132,0.5)" stroke-width="0.5"/>
+        <line x1="14" y1="16" x2="2" y2="9" stroke="rgba(61,220,132,0.5)" stroke-width="0.5"/>
+      </svg>
+    </div>
+    <span class="name">IGOR<span>UNITY</span></span>
+  </div>
+  <div class="toolbar-tabs">
+    <button class="tab active" onclick="showSection('home')">🏠 Home</button>
+    <button class="tab" onclick="showSection('temas')">📚 Temas</button>
+    <button class="tab" onclick="showSection('videos');openModal('videos')">🎬 Vídeos</button>
+    <button class="tab" onclick="showSection('proyectos');openModal('proyectos')">📦 Proyectos</button>
+    <button class="tab" onclick="showSection('logros');openModal('logros')">🏆 Logros</button>
+  </div>
+  <div class="toolbar-right">
+    <div class="xp-bar">
+      <span class="xp-label">XP</span>
+      <div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
+      <span class="xp-label" id="xpNum">0/100</span>
+    </div>
+    <span class="igor-pts" id="igPts">⭐ 0 IP</span>
+  </div>
+</nav>
+
+<!-- ═══════════════ MAIN WRAPPER ═══════════════ -->
+<div class="main-wrapper">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">// HIERARCHY — TEMAS</div>
+  <div class="sidebar-search">
+    <input type="text" placeholder="Buscar tema..." id="searchInput" oninput="filterNav(this.value)">
+  </div>
+
+  <div id="navTree">
+
+    <!-- NIVEL 0 -->
+    <div class="nav-section">
+      <div class="nav-section-header" onclick="toggleNav(this)">
+        <span class="sect-icon">🖥️</span>
+        <span style="color:#38bdf8">NIVEL 0 — EL EDITOR</span>
+        <span class="nav-section-header sect-count">8</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="nav-items">
+        <a class="nav-item active" href="#t0-1"><span class="dot"></span>¿Qué es Unity?</a>
+        <a class="nav-item" href="#t0-2"><span class="dot"></span>Instalación y Hub</a>
+        <a class="nav-item" href="#t0-3"><span class="dot"></span>Interfaz — Ventanas</a>
+        <a class="nav-item" href="#t0-4"><span class="dot"></span>Scene y Game View</a>
+        <a class="nav-item" href="#t0-5"><span class="dot"></span>Hierarchy e Inspector</a>
+        <a class="nav-item" href="#t0-6"><span class="dot"></span>Project y Console</a>
+        <a class="nav-item locked" href="#t0-7"><span class="dot"></span>🔒 Organización y carpetas</a>
+        <a class="nav-item locked" href="#t0-8"><span class="dot"></span>🔒 Git y control de versiones</a>
+      </div>
+    </div>
+
+    <!-- NIVEL 1 -->
+    <div class="nav-section">
+      <div class="nav-section-header" onclick="toggleNav(this)">
+        <span class="sect-icon">🧱</span>
+        <span style="color:#a78bfa">NIVEL 1 — GAMEOBJECTS</span>
+        <span class="nav-section-header sect-count">7</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="nav-items">
+        <a class="nav-item" href="#t1-1"><span class="dot"></span>GameObject y Transform</a>
+        <a class="nav-item" href="#t1-2"><span class="dot"></span>Componentes esenciales</a>
+        <a class="nav-item" href="#t1-3"><span class="dot"></span>Prefabs y Variants</a>
+        <a class="nav-item" href="#t1-4"><span class="dot"></span>Parenting y jerarquía</a>
+        <a class="nav-item locked" href="#t1-5"><span class="dot"></span>🔒 Renderer y materiales</a>
+        <a class="nav-item locked" href="#t1-6"><span class="dot"></span>🔒 Camera y Light</a>
+        <a class="nav-item locked" href="#t1-7"><span class="dot"></span>🔒 Primeras escenas 3D/2D</a>
+      </div>
+    </div>
+
+    <!-- NIVEL 2 -->
+    <div class="nav-section">
+      <div class="nav-section-header" onclick="toggleNav(this)">
+        <span class="sect-icon">⚙️</span>
+        <span style="color:#3ddc84">NIVEL 2 — C# SCRIPTING</span>
+        <span class="nav-section-header sect-count">14</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="nav-items">
+        <a class="nav-item" href="#t2-1"><span class="dot"></span>Intro a C# en Unity</a>
+        <a class="nav-item" href="#t2-2"><span class="dot"></span>Variables y tipos</a>
+        <a class="nav-item" href="#t2-3"><span class="dot"></span>Condicionales if/else</a>
+        <a class="nav-item" href="#t2-4"><span class="dot"></span>Bucles for / foreach</a>
+        <a class="nav-item" href="#t2-5"><span class="dot"></span>Métodos y funciones</a>
+        <a class="nav-item" href="#t2-6"><span class="dot"></span>Clases y objetos</a>
+        <a class="nav-item" href="#t2-7"><span class="dot"></span>Herencia y polimorfismo</a>
+        <a class="nav-item" href="#t2-8"><span class="dot"></span>Interfaces abstractas</a>
+        <a class="nav-item" href="#t2-9"><span class="dot"></span>MonoBehaviour — Start/Update</a>
+        <a class="nav-item" href="#t2-10"><span class="dot"></span>GetComponent y referencias</a>
+        <a class="nav-item locked" href="#t2-11"><span class="dot"></span>🔒 Arrays, List, Dictionary</a>
+        <a class="nav-item locked" href="#t2-12"><span class="dot"></span>🔒 Coroutines</a>
+        <a class="nav-item locked" href="#t2-13"><span class="dot"></span>🔒 Input clásico y nuevo</a>
+        <a class="nav-item locked" href="#t2-14"><span class="dot"></span>🔒 SerializeField e Inspector</a>
+      </div>
+    </div>
+
+    <!-- NIVEL 3 -->
+    <div class="nav-section">
+      <div class="nav-section-header" onclick="toggleNav(this)">
+        <span class="sect-icon">🎮</span>
+        <span style="color:#f59e0b">NIVEL 3 — MOVIMIENTO Y FÍSICA</span>
+        <span class="nav-section-header sect-count">10</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="nav-items">
+        <a class="nav-item" href="#t3-1"><span class="dot"></span>Vectores y matemáticas</a>
+        <a class="nav-item" href="#t3-2"><span class="dot"></span>Lerp y SmoothDamp</a>
+        <a class="nav-item" href="#t3-3"><span class="dot"></span>CharacterController</a>
+        <a class="nav-item" href="#t3-4"><span class="dot"></span>Rigidbody y fuerzas</a>
+        <a class="nav-item" href="#t3-5"><span class="dot"></span>Colisiones y Triggers</a>
+        <a class="nav-item" href="#t3-6"><span class="dot"></span>Movimiento 2D plataformas</a>
+        <a class="nav-item" href="#t3-7"><span class="dot"></span>Top-Down movement</a>
+        <a class="nav-item locked" href="#t3-8"><span class="dot"></span>🔒 FPS Controller</a>
+        <a class="nav-item locked" href="#t3-9"><span class="dot"></span>🔒 Física 2D — Rigidbody2D</a>
+        <a class="nav-item locked" href="#t3-10"><span class="dot"></span>🔒 Raycast y detección</a>
+      </div>
+    </div>
+
+    <!-- NIVEL 4 -->
+    <div class="nav-section">
+      <div class="nav-section-header" onclick="toggleNav(this)">
+        <span class="sect-icon">🎨</span>
+        <span style="color:#f97316">NIVEL 4 — SISTEMAS UNITY</span>
+        <span class="nav-section-header sect-count">15</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="nav-items">
+        <a class="nav-item" href="#t4-1"><span class="dot"></span>Animator y transitions</a>
+        <a class="nav-item" href="#t4-2"><span class="dot"></span>Animation Clips</a>
+        <a class="nav-item" href="#t4-3"><span class="dot"></span>AudioSource y mixers</a>
+        <a class="nav-item" href="#t4-4"><span class="dot"></span>UI — Canvas y anchors</a>
+        <a class="nav-item" href="#t4-5"><span class="dot"></span>Botones, sliders, TextMeshPro</a>
+        <a class="nav-item" href="#t4-6"><span class="dot"></span>Barras de vida y HUD</a>
+        <a class="nav-item" href="#t4-7"><span class="dot"></span>Partículas y VFX</a>
+        <a class="nav-item" href="#t4-8"><span class="dot"></span>Iluminación 2D</a>
+        <a class="nav-item" href="#t4-9"><span class="dot"></span>Post Processing</a>
+        <a class="nav-item" href="#t4-10"><span class="dot"></span>DoTween</a>
+        <a class="nav-item locked" href="#t4-11"><span class="dot"></span>🔒 NavMesh y pathfinding</a>
+        <a class="nav-item locked" href="#t4-12"><span class="dot"></span>🔒 Tilemap y 2D</a>
+        <a class="nav-item locked" href="#t4-13"><span class="dot"></span>🔒 ProBuilder</a>
+        <a class="nav-item locked" href="#t4-14"><span class="dot"></span>🔒 SceneManagement</a>
+        <a class="nav-item locked" href="#t4-15"><span class="dot"></span>🔒 Cinemachine</a>
+      </div>
+    </div>
+
+    <!-- NIVEL 5 -->
+    <div class="nav-section">
+      <div class="nav-section-header" onclick="toggleNav(this)">
+        <span class="sect-icon">🔥</span>
+        <span style="color:#ec4899">NIVEL 5 — PROYECTOS REALES</span>
+        <span class="nav-section-header sect-count">12</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="nav-items">
+        <a class="nav-item locked" href="#t5-1"><span class="dot"></span>🔒 Combate melee y hitboxes</a>
+        <a class="nav-item locked" href="#t5-2"><span class="dot"></span>🔒 Inventario RPG</a>
+        <a class="nav-item locked" href="#t5-3"><span class="dot"></span>🔒 IA enemiga — State Machine</a>
+        <a class="nav-item locked" href="#t5-4"><span class="dot"></span>🔒 NPC completo</a>
+        <a class="nav-item locked" href="#t5-5"><span class="dot"></span>🔒 Sistema de diálogos</a>
+        <a class="nav-item locked" href="#t5-6"><span class="dot"></span>🔒 ScriptableObjects</a>
+        <a class="nav-item locked" href="#t5-7"><span class="dot"></span>🔒 Sistema de guardado</a>
+        <a class="nav-item locked" href="#t5-8"><span class="dot"></span>🔒 Generación procedural</a>
+        <a class="nav-item locked" href="#t5-9"><span class="dot"></span>🔒 Shooter top-down completo</a>
+        <a class="nav-item locked" href="#t5-10"><span class="dot"></span>🔒 RPG con stats y quests</a>
+        <a class="nav-item locked" href="#t5-11"><span class="dot"></span>🔒 Plataformas 2D completo</a>
+        <a class="nav-item locked" href="#t5-12"><span class="dot"></span>🔒 Survival horror</a>
+      </div>
+    </div>
+
+    <!-- NIVEL 6 -->
+    <div class="nav-section">
+      <div class="nav-section-header" onclick="toggleNav(this)">
+        <span class="sect-icon">🚀</span>
+        <span style="color:#ef4444">NIVEL 6 — EXPERTO</span>
+        <span class="nav-section-header sect-count">16</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="nav-items">
+        <a class="nav-item locked" href="#t6-1"><span class="dot"></span>🔒 Delegates y Events</a>
+        <a class="nav-item locked" href="#t6-2"><span class="dot"></span>🔒 Action, Func, Predicate</a>
+        <a class="nav-item locked" href="#t6-3"><span class="dot"></span>🔒 LINQ y lambdas</a>
+        <a class="nav-item locked" href="#t6-4"><span class="dot"></span>🔒 Async / Await / Tasks</a>
+        <a class="nav-item locked" href="#t6-5"><span class="dot"></span>🔒 Patrones de diseño</a>
+        <a class="nav-item locked" href="#t6-6"><span class="dot"></span>🔒 Shader Graph</a>
+        <a class="nav-item locked" href="#t6-7"><span class="dot"></span>🔒 VFX Graph</a>
+        <a class="nav-item locked" href="#t6-8"><span class="dot"></span>🔒 Addressables</a>
+        <a class="nav-item locked" href="#t6-9"><span class="dot"></span>🔒 ECS y DOTS intro</a>
+        <a class="nav-item locked" href="#t6-10"><span class="dot"></span>🔒 Multiplayer — Netcode</a>
+        <a class="nav-item locked" href="#t6-11"><span class="dot"></span>🔒 ML Agents</a>
+        <a class="nav-item locked" href="#t6-12"><span class="dot"></span>🔒 VR con XR Toolkit</a>
+        <a class="nav-item locked" href="#t6-13"><span class="dot"></span>🔒 Optimización y Profiler</a>
+        <a class="nav-item locked" href="#t6-14"><span class="dot"></span>🔒 Custom Editor Tools</a>
+        <a class="nav-item locked" href="#t6-15"><span class="dot"></span>🔒 Builds y publicación</a>
+        <a class="nav-item locked" href="#t6-16"><span class="dot"></span>🔒 Portfolio y mundo laboral</a>
+      </div>
+    </div>
+
+  </div>
+</aside>
+
+<!-- ═══════════════ CONTENT ═══════════════ -->
+<main class="content" id="mainContent">
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      LIVE · 82 TEMAS · DE 0 A EXPERTO
+    </div>
+    <h1>
+      <span class="white">IGOR</span><span class="green">UNITY</span>
+    </h1>
+    <p class="hero-sub">// aprende Unity con Igor · desde GameObjects hasta Multiplayer</p>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="num" id="cntTemas">82</span>
+        <span class="lbl">TEMAS</span>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat">
+        <span class="num">10+</span>
+        <span class="lbl">VÍDEOS CLASE</span>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat">
+        <span class="num">91</span>
+        <span class="lbl">ASSETS .ZIP</span>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat">
+        <span class="num">7</span>
+        <span class="lbl">NIVELES</span>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat">
+        <span class="num">∞</span>
+        <span class="lbl">IGORPOINTS</span>
+      </div>
+    </div>
+
+    <div class="hero-ctas">
+      <a href="#nivel-0" class="btn-primary">▶ EMPEZAR DESDE 0</a>
+      <button class="btn-secondary" onclick="openModal('roadmap')">🗺️ Ver Hoja de Ruta</button>
+      <button class="btn-secondary" onclick="openModal('videos')">🎬 Vídeos de Clase</button>
+    </div>
+  </section>
+
+  <!-- ── STATS BAR ── -->
+  <div class="stats-bar fade-in">
+    <div class="stat-item">
+      <div class="s-num" id="s1">0</div>
+      <div class="s-label">TEMAS COMPLETADOS</div>
+    </div>
+    <div class="stat-item">
+      <div class="s-num" id="s2">0</div>
+      <div class="s-label">IGORPOINTS</div>
+    </div>
+    <div class="stat-item">
+      <div class="s-num" id="s3">0</div>
+      <div class="s-label">LOGROS</div>
+    </div>
+    <div class="stat-item">
+      <div class="s-num" id="s4">0</div>
+      <div class="s-label">RACHA DE DÍAS</div>
+    </div>
+    <div class="stat-item">
+      <div class="s-num" id="s5">0%</div>
+      <div class="s-label">PROGRESO TOTAL</div>
+    </div>
+  </div>
+
+  <!-- ── ROADMAP ── -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <h2>HOJA DE RUTA</h2>
+      <span class="section-tag">ROADMAP</span>
+    </div>
+    <p class="section-desc">7 niveles progresivos. Cada uno desbloquea el siguiente. Completa ejercicios para ganar IgorPoints.</p>
+
+    <div class="roadmap">
+      <div class="rm-block">
+        <div class="rm-node active" onclick="scrollToSection('nivel-0')" title="El Editor">
+          🖥️
+          <div class="rm-badge">0</div>
+        </div>
+        <div class="rm-label">El Editor</div>
+        <div class="rm-count">8 temas</div>
+      </div>
+      <div class="rm-connector"></div>
+      <div class="rm-block">
+        <div class="rm-node" onclick="scrollToSection('nivel-1')" title="GameObjects">
+          🧱
+          <div class="rm-badge">1</div>
+        </div>
+        <div class="rm-label">GameObjects</div>
+        <div class="rm-count">7 temas</div>
+      </div>
+      <div class="rm-connector"></div>
+      <div class="rm-block">
+        <div class="rm-node" onclick="scrollToSection('nivel-2')" title="C# Scripting">
+          ⚙️
+          <div class="rm-badge">2</div>
+        </div>
+        <div class="rm-label">C# Scripting</div>
+        <div class="rm-count">14 temas</div>
+      </div>
+      <div class="rm-connector"></div>
+      <div class="rm-block">
+        <div class="rm-node" onclick="scrollToSection('nivel-3')" title="Movimiento">
+          🎮
+          <div class="rm-badge">3</div>
+        </div>
+        <div class="rm-label">Movimiento</div>
+        <div class="rm-count">10 temas</div>
+      </div>
+      <div class="rm-connector"></div>
+      <div class="rm-block">
+        <div class="rm-node" onclick="scrollToSection('nivel-4')" title="Sistemas">
+          🎨
+          <div class="rm-badge">4</div>
+        </div>
+        <div class="rm-label">Sistemas</div>
+        <div class="rm-count">15 temas</div>
+      </div>
+      <div class="rm-connector"></div>
+      <div class="rm-block">
+        <div class="rm-node" onclick="scrollToSection('nivel-5')" title="Proyectos">
+          🔥
+          <div class="rm-badge">5</div>
+        </div>
+        <div class="rm-label">Proyectos</div>
+        <div class="rm-count">12 temas</div>
+      </div>
+      <div class="rm-connector"></div>
+      <div class="rm-block">
+        <div class="rm-node" onclick="scrollToSection('nivel-6')" title="Experto">
+          🚀
+          <div class="rm-badge">6</div>
+        </div>
+        <div class="rm-label">Experto</div>
+        <div class="rm-count">16 temas</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ NIVEL 0 ═══════ -->
+  <section class="section fade-in" id="nivel-0">
+    <div class="section-title">
+      <span class="level-badge lb-0">🖥️ NIVEL 0</span>
+      <h2>EL EDITOR</h2>
+      <span class="section-tag">FUNDAMENTOS</span>
+    </div>
+    <p class="section-desc">Empieza aquí. Domina la interfaz de Unity antes de escribir una sola línea de código. Todo pasa por aquí.</p>
+    <div class="topics-grid">
+      <a class="topic-card nivel-0" href="#" onclick="openTopic('t0-1'); return false;">
+        <div class="tc-header">
+          <div class="tc-icon">🎯</div>
+          <div class="tc-info">
+            <div class="tc-num">T.0.1</div>
+            <div class="tc-title">¿Qué es Unity?</div>
+          </div>
+        </div>
+        <div class="tc-desc">Motor gráfico vs framework vs librería. Historia, versiones LTS/TECH, dónde se usa Unity en la industria.</div>
+        <div class="tc-tags"><span class="tc-tag">motor</span><span class="tc-tag">LTS</span><span class="tc-tag">industria</span></div>
+        <div class="tc-footer">
+          <div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div>
+          <span class="tc-check">▶</span>
+        </div>
+      </a>
+      <a class="topic-card nivel-0" href="#" onclick="openTopic('t0-2'); return false;">
+        <div class="tc-header">
+          <div class="tc-icon">📥</div>
+          <div class="tc-info">
+            <div class="tc-num">T.0.2</div>
+            <div class="tc-title">Instalación y Unity Hub</div>
+          </div>
+        </div>
+        <div class="tc-desc">Descarga, instalación del Hub, gestión de versiones, creación de proyectos, plantillas URP/HDRP/Built-In.</div>
+        <div class="tc-tags"><span class="tc-tag">Hub</span><span class="tc-tag">URP</span><span class="tc-tag">HDRP</span></div>
+        <div class="tc-footer">
+          <div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill video">Vídeo</span></div>
+          <span class="tc-check">▶</span>
+        </div>
+      </a>
+      <a class="topic-card nivel-0" href="#" onclick="openTopic('t0-3'); return false;">
+        <div class="tc-header">
+          <div class="tc-icon">🪟</div>
+          <div class="tc-info">
+            <div class="tc-num">T.0.3</div>
+            <div class="tc-title">Interfaz — Ventanas</div>
+          </div>
+        </div>
+        <div class="tc-desc">Hierarchy, Scene, Game View, Inspector, Project, Console, Package Manager. Layouts y atajos de teclado esenciales.</div>
+        <div class="tc-tags"><span class="tc-tag">Hierarchy</span><span class="tc-tag">Inspector</span><span class="tc-tag">Console</span></div>
+        <div class="tc-footer">
+          <div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span><span class="tc-pill video">Vídeo</span></div>
+          <span class="tc-check">▶</span>
+        </div>
+      </a>
+      <a class="topic-card nivel-0" href="#" onclick="openTopic('t0-4'); return false;">
+        <div class="tc-header">
+          <div class="tc-icon">🎬</div>
+          <div class="tc-info">
+            <div class="tc-num">T.0.4</div>
+            <div class="tc-title">Scene View y Navegación 3D</div>
+          </div>
+        </div>
+        <div class="tc-desc">Mover, rotar y escalar en Scene. Gizmos, Pivot/Center, Local/Global. Snap, shortcuts y navegación fluida.</div>
+        <div class="tc-tags"><span class="tc-tag">gizmos</span><span class="tc-tag">snap</span><span class="tc-tag">3D</span></div>
+        <div class="tc-footer">
+          <div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div>
+          <span class="tc-check">▶</span>
+        </div>
+      </a>
+      <a class="topic-card nivel-0" href="#" onclick="openTopic('t0-5'); return false;">
+        <div class="tc-header">
+          <div class="tc-icon">🔍</div>
+          <div class="tc-info">
+            <div class="tc-num">T.0.5</div>
+            <div class="tc-title">Inspector y Componentes</div>
+          </div>
+        </div>
+        <div class="tc-desc">Lectura e interacción con el Inspector. Añadir y quitar componentes. Transform en profundidad.</div>
+        <div class="tc-tags"><span class="tc-tag">Inspector</span><span class="tc-tag">Transform</span></div>
+        <div class="tc-footer">
+          <div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div>
+          <span class="tc-check">▶</span>
+        </div>
+      </a>
+      <a class="topic-card nivel-0" href="#" onclick="openTopic('t0-6'); return false;">
+        <div class="tc-header">
+          <div class="tc-icon">📁</div>
+          <div class="tc-info">
+            <div class="tc-num">T.0.6</div>
+            <div class="tc-title">Project, Console y Assets</div>
+          </div>
+        </div>
+        <div class="tc-desc">Estructura de carpetas profesional, naming conventions, importar assets. Console: errores, warnings, logs.</div>
+        <div class="tc-tags"><span class="tc-tag">assets</span><span class="tc-tag">naming</span><span class="tc-tag">console</span></div>
+        <div class="tc-footer">
+          <div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div>
+          <span class="tc-check">▶</span>
+        </div>
+      </a>
+      <a class="topic-card nivel-0" href="#" onclick="openTopic('t0-7'); return false;">
+        <div class="tc-header">
+          <div class="tc-icon">🗂️</div>
+          <div class="tc-info">
+            <div class="tc-num">T.0.7</div>
+            <div class="tc-title">Organización de Proyectos</div>
+          </div>
+        </div>
+        <div class="tc-desc">Estructura profesional de carpetas, buenas prácticas, naming conventions, separación por tipo de asset.</div>
+        <div class="tc-tags"><span class="tc-tag">arquitectura</span><span class="tc-tag">profesional</span></div>
+        <div class="tc-footer">
+          <div class="tc-pills"><span class="tc-pill theory">Teoría</span></div>
+          <span class="tc-check">▶</span>
+        </div>
+      </a>
+      <a class="topic-card nivel-0" href="#" onclick="openTopic('t0-8'); return false;">
+        <div class="tc-header">
+          <div class="tc-icon">🌿</div>
+          <div class="tc-info">
+            <div class="tc-num">T.0.8</div>
+            <div class="tc-title">Git y Control de Versiones</div>
+          </div>
+        </div>
+        <div class="tc-desc">GitHub Desktop y Plastic SCM para Unity. .gitignore, commits, branches, colaboración en proyectos.</div>
+        <div class="tc-tags"><span class="tc-tag">Git</span><span class="tc-tag">GitHub</span><span class="tc-tag">PlasticSCM</span></div>
+        <div class="tc-footer">
+          <div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div>
+          <span class="tc-check">▶</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════ NIVEL 1 ═══════ -->
+  <section class="section fade-in" id="nivel-1">
+    <div class="section-title">
+      <span class="level-badge lb-1">🧱 NIVEL 1</span>
+      <h2>GAMEOBJECTS Y ESCENA</h2>
+      <span class="section-tag">FUNDAMENTOS</span>
+    </div>
+    <p class="section-desc">Todo en Unity es un GameObject. Aprende a construir escenas desde cero usando el sistema de componentes.</p>
+    <div class="topics-grid">
+      <a class="topic-card nivel-1" href="#" onclick="openTopic('t1-1'); return false;">
+        <div class="tc-header"><div class="tc-icon">📦</div><div class="tc-info"><div class="tc-num">T.1.1</div><div class="tc-title">GameObject y Transform</div></div></div>
+        <div class="tc-desc">Qué es un GameObject. Position, Rotation, Scale. Mover objetos desde código y desde el editor.</div>
+        <div class="tc-tags"><span class="tc-tag">Transform</span><span class="tc-tag">position</span><span class="tc-tag">rotation</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-1" href="#" onclick="openTopic('t1-2'); return false;">
+        <div class="tc-header"><div class="tc-icon">🧩</div><div class="tc-info"><div class="tc-num">T.1.2</div><div class="tc-title">Componentes Esenciales</div></div></div>
+        <div class="tc-desc">Mesh Renderer, Sprite Renderer, Rigidbody, Collider, Camera, Light. Cómo añadirlos y configurarlos.</div>
+        <div class="tc-tags"><span class="tc-tag">MeshRenderer</span><span class="tc-tag">Collider</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-1" href="#" onclick="openTopic('t1-3'); return false;">
+        <div class="tc-header"><div class="tc-icon">🏗️</div><div class="tc-info"><div class="tc-num">T.1.3</div><div class="tc-title">Prefabs y Variants</div></div></div>
+        <div class="tc-desc">Crear y usar Prefabs. Nested Prefabs, Overrides, instanciación dinámica. El asset más importante de Unity.</div>
+        <div class="tc-tags"><span class="tc-tag">Prefab</span><span class="tc-tag">Instantiate</span><span class="tc-tag">overrides</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-1" href="#" onclick="openTopic('t1-4'); return false;">
+        <div class="tc-header"><div class="tc-icon">🌳</div><div class="tc-info"><div class="tc-num">T.1.4</div><div class="tc-title">Parenting y Jerarquía</div></div></div>
+        <div class="tc-desc">Relaciones padre-hijo. Herencia de Transform. Cómo organizar escenas complejas en la Hierarchy.</div>
+        <div class="tc-tags"><span class="tc-tag">parenting</span><span class="tc-tag">jerarquía</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-1" href="#" onclick="openTopic('t1-5'); return false;">
+        <div class="tc-header"><div class="tc-icon">🎨</div><div class="tc-info"><div class="tc-num">T.1.5</div><div class="tc-title">Materiales y Texturas</div></div></div>
+        <div class="tc-desc">Crear materiales básicos en URP. Texturas, tiling, normal maps. Colores y propiedades del material.</div>
+        <div class="tc-tags"><span class="tc-tag">Material</span><span class="tc-tag">Texture</span><span class="tc-tag">URP</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-1" href="#" onclick="openTopic('t1-6'); return false;">
+        <div class="tc-header"><div class="tc-icon">📷</div><div class="tc-info"><div class="tc-num">T.1.6</div><div class="tc-title">Cámara y Luces</div></div></div>
+        <div class="tc-desc">Configurar la cámara principal. Tipos de luces: Directional, Point, Spot. Sombras y baking básico.</div>
+        <div class="tc-tags"><span class="tc-tag">Camera</span><span class="tc-tag">Light</span><span class="tc-tag">shadows</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-1" href="#" onclick="openTopic('t1-7'); return false;">
+        <div class="tc-header"><div class="tc-icon">🌍</div><div class="tc-info"><div class="tc-num">T.1.7</div><div class="tc-title">Primera Escena 3D/2D</div></div></div>
+        <div class="tc-desc">Proyecto de primeros pasos: construye una escena completa desde cero con objetos, luces, cámara y materiales.</div>
+        <div class="tc-tags"><span class="tc-tag">proyecto</span><span class="tc-tag">escena</span><span class="tc-tag">3D</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill project">Proyecto</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════ NIVEL 2 ═══════ -->
+  <section class="section fade-in" id="nivel-2">
+    <div class="section-title">
+      <span class="level-badge lb-2">⚙️ NIVEL 2</span>
+      <h2>C# SCRIPTING</h2>
+      <span class="section-tag">PROGRAMACIÓN</span>
+    </div>
+    <p class="section-desc">Aprende C# desde cero en el contexto de Unity. Variables, lógica, POO completa hasta Interfaces y Delegates.</p>
+    <div class="topics-grid">
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-1'); return false;">
+        <div class="tc-header"><div class="tc-icon">💬</div><div class="tc-info"><div class="tc-num">T.2.1</div><div class="tc-title">Intro a C# en Unity</div></div></div>
+        <div class="tc-desc">Visual Studio / Rider. Primer script. Debug.Log. IntelliSense. Compilación. Estructura de un script Unity.</div>
+        <div class="tc-tags"><span class="tc-tag">MonoBehaviour</span><span class="tc-tag">Debug.Log</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-2'); return false;">
+        <div class="tc-header"><div class="tc-icon">🔢</div><div class="tc-info"><div class="tc-num">T.2.2</div><div class="tc-title">Variables y Tipos</div></div></div>
+        <div class="tc-desc">int, float, bool, string, var. Operadores matemáticos, comparación y lógicos. Declarar y asignar en Unity.</div>
+        <div class="tc-tags"><span class="tc-tag">int</span><span class="tc-tag">float</span><span class="tc-tag">bool</span><span class="tc-tag">string</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-3'); return false;">
+        <div class="tc-header"><div class="tc-icon">🔀</div><div class="tc-info"><div class="tc-num">T.2.3</div><div class="tc-title">Condicionales</div></div></div>
+        <div class="tc-desc">if / else if / else. switch / case. Operador ternario. Lógicos && || !. Ejemplos con gameplay real.</div>
+        <div class="tc-tags"><span class="tc-tag">if</span><span class="tc-tag">switch</span><span class="tc-tag">ternario</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-4'); return false;">
+        <div class="tc-header"><div class="tc-icon">🔁</div><div class="tc-info"><div class="tc-num">T.2.4</div><div class="tc-title">Bucles</div></div></div>
+        <div class="tc-desc">for, foreach, while, do-while. Iterar sobre arrays y listas. Casos de uso en Unity (generar enemigos, etc.).</div>
+        <div class="tc-tags"><span class="tc-tag">for</span><span class="tc-tag">foreach</span><span class="tc-tag">while</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-5'); return false;">
+        <div class="tc-header"><div class="tc-icon">🔧</div><div class="tc-info"><div class="tc-num">T.2.5</div><div class="tc-title">Métodos y Funciones</div></div></div>
+        <div class="tc-desc">Declarar y llamar métodos. Return, parámetros, overloads, métodos estáticos. Organizar el código en Unity.</div>
+        <div class="tc-tags"><span class="tc-tag">return</span><span class="tc-tag">parámetros</span><span class="tc-tag">static</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-6'); return false;">
+        <div class="tc-header"><div class="tc-icon">🏛️</div><div class="tc-info"><div class="tc-num">T.2.6</div><div class="tc-title">Clases y Objetos</div></div></div>
+        <div class="tc-desc">Clases en C#. Atributos, constructores, getters/setters. Serializable. El ejemplo Pokémon de Igor.</div>
+        <div class="tc-tags"><span class="tc-tag">class</span><span class="tc-tag">constructor</span><span class="tc-tag">Serializable</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-7'); return false;">
+        <div class="tc-header"><div class="tc-icon">👨‍👦</div><div class="tc-info"><div class="tc-num">T.2.7</div><div class="tc-title">Herencia y Polimorfismo</div></div></div>
+        <div class="tc-desc">Clases hijas, override, base. Polimorfismo en Unity. PokemonAgua : Pokemon, PokemonFuego : Pokemon.</div>
+        <div class="tc-tags"><span class="tc-tag">herencia</span><span class="tc-tag">override</span><span class="tc-tag">base</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-8'); return false;">
+        <div class="tc-header"><div class="tc-icon">📋</div><div class="tc-info"><div class="tc-num">T.2.8</div><div class="tc-title">Interfaces y Abstractas</div></div></div>
+        <div class="tc-desc">Clases abstractas vs interfaces. ICapturable, IInteractable. Cuándo usar cada una en Unity.</div>
+        <div class="tc-tags"><span class="tc-tag">interface</span><span class="tc-tag">abstract</span><span class="tc-tag">ICapturable</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-9'); return false;">
+        <div class="tc-header"><div class="tc-icon">⏱️</div><div class="tc-info"><div class="tc-num">T.2.9</div><div class="tc-title">MonoBehaviour — Ciclo de Vida</div></div></div>
+        <div class="tc-desc">Awake, Start, Update, FixedUpdate, LateUpdate. Cuándo usar cada uno. Orden de ejecución en Unity.</div>
+        <div class="tc-tags"><span class="tc-tag">Awake</span><span class="tc-tag">Start</span><span class="tc-tag">Update</span><span class="tc-tag">Fixed</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-10'); return false;">
+        <div class="tc-header"><div class="tc-icon">🔗</div><div class="tc-info"><div class="tc-num">T.2.10</div><div class="tc-title">GetComponent y Referencias</div></div></div>
+        <div class="tc-desc">GetComponent, Find, SerializeField. Referencias públicas y privadas. Cómo conectar scripts entre objetos.</div>
+        <div class="tc-tags"><span class="tc-tag">GetComponent</span><span class="tc-tag">SerializeField</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-11'); return false;">
+        <div class="tc-header"><div class="tc-icon">📚</div><div class="tc-info"><div class="tc-num">T.2.11</div><div class="tc-title">Arrays, List y Dictionary</div></div></div>
+        <div class="tc-desc">Arrays, List&lt;T&gt;, Dictionary. Queue, Stack, HashSet. Cuándo usar cada colección en proyectos Unity.</div>
+        <div class="tc-tags"><span class="tc-tag">List</span><span class="tc-tag">Dictionary</span><span class="tc-tag">Array</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-12'); return false;">
+        <div class="tc-header"><div class="tc-icon">🔄</div><div class="tc-info"><div class="tc-num">T.2.12</div><div class="tc-title">Coroutines</div></div></div>
+        <div class="tc-desc">IEnumerator, yield return, WaitForSeconds, WaitUntil. Secuencias temporales sin bloquear el juego.</div>
+        <div class="tc-tags"><span class="tc-tag">Coroutine</span><span class="tc-tag">yield</span><span class="tc-tag">WaitForSeconds</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-13'); return false;">
+        <div class="tc-header"><div class="tc-icon">🎮</div><div class="tc-info"><div class="tc-num">T.2.13</div><div class="tc-title">Sistema de Input</div></div></div>
+        <div class="tc-desc">Input clásico y nuevo Input System. GetKey, GetAxis, Input Actions, Action Maps, rebinding de controles.</div>
+        <div class="tc-tags"><span class="tc-tag">Input</span><span class="tc-tag">ActionMaps</span><span class="tc-tag">rebinding</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-2" href="#" onclick="openTopic('t2-14'); return false;">
+        <div class="tc-header"><div class="tc-icon">🏷️</div><div class="tc-info"><div class="tc-num">T.2.14</div><div class="tc-title">SerializeField y Inspector</div></div></div>
+        <div class="tc-desc">[SerializeField], [Header], [Range], [Tooltip]. Editar variables desde el Inspector sin hacerlas públicas.</div>
+        <div class="tc-tags"><span class="tc-tag">SerializeField</span><span class="tc-tag">Header</span><span class="tc-tag">Range</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════ NIVEL 3 ═══════ -->
+  <section class="section fade-in" id="nivel-3">
+    <div class="section-title">
+      <span class="level-badge lb-3">🎮 NIVEL 3</span>
+      <h2>MOVIMIENTO Y FÍSICA</h2>
+      <span class="section-tag">GAMEPLAY</span>
+    </div>
+    <p class="section-desc">Mueve personajes. Simula física real. Detecta colisiones. Aquí nace el gameplay.</p>
+    <div class="topics-grid">
+      <a class="topic-card nivel-3" href="#" onclick="openTopic('t3-1'); return false;">
+        <div class="tc-header"><div class="tc-icon">📐</div><div class="tc-info"><div class="tc-num">T.3.1</div><div class="tc-title">Vectores y Matemáticas</div></div></div>
+        <div class="tc-desc">Vector2, Vector3, distancia, magnitud, normalización. Producto escalar y vectorial. Trigonometría en Unity.</div>
+        <div class="tc-tags"><span class="tc-tag">Vector3</span><span class="tc-tag">normalize</span><span class="tc-tag">dot</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-3" href="#" onclick="openTopic('t3-2'); return false;">
+        <div class="tc-header"><div class="tc-icon">🎢</div><div class="tc-info"><div class="tc-num">T.3.2</div><div class="tc-title">Lerp y SmoothDamp</div></div></div>
+        <div class="tc-desc">Vector3.Lerp, Quaternion.Slerp, SmoothDamp, MoveTowards. Interpolación fluida para cámara y movimiento.</div>
+        <div class="tc-tags"><span class="tc-tag">Lerp</span><span class="tc-tag">SmoothDamp</span><span class="tc-tag">Slerp</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-3" href="#" onclick="openTopic('t3-3'); return false;">
+        <div class="tc-header"><div class="tc-icon">🚶</div><div class="tc-info"><div class="tc-num">T.3.3</div><div class="tc-title">CharacterController</div></div></div>
+        <div class="tc-desc">Walk, run, crouch, jump, gravedad. El MovimientoPlayer.cs de Igor al completo. Detección de suelo con GroundCheck.</div>
+        <div class="tc-tags"><span class="tc-tag">CharacterController</span><span class="tc-tag">jump</span><span class="tc-tag">crouch</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span><span class="tc-pill project">Proyecto</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-3" href="#" onclick="openTopic('t3-4'); return false;">
+        <div class="tc-header"><div class="tc-icon">⚖️</div><div class="tc-info"><div class="tc-num">T.3.4</div><div class="tc-title">Rigidbody y Fuerzas</div></div></div>
+        <div class="tc-desc">AddForce, velocity, drag, mass, gravity. Diferencia con CharacterController. Cuándo usar cada uno.</div>
+        <div class="tc-tags"><span class="tc-tag">Rigidbody</span><span class="tc-tag">AddForce</span><span class="tc-tag">drag</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-3" href="#" onclick="openTopic('t3-5'); return false;">
+        <div class="tc-header"><div class="tc-icon">💥</div><div class="tc-info"><div class="tc-num">T.3.5</div><div class="tc-title">Colisiones y Triggers</div></div></div>
+        <div class="tc-desc">OnCollisionEnter/Exit/Stay. OnTriggerEnter/Exit. Diferencias clave. Agua, niebla y zonas de trigger.</div>
+        <div class="tc-tags"><span class="tc-tag">OnCollision</span><span class="tc-tag">OnTrigger</span><span class="tc-tag">isTrigger</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-3" href="#" onclick="openTopic('t3-6'); return false;">
+        <div class="tc-header"><div class="tc-icon">🏃</div><div class="tc-info"><div class="tc-num">T.3.6</div><div class="tc-title">Plataformas 2D</div></div></div>
+        <div class="tc-desc">Movimiento lateral, salto, doble salto, coyote time. Rigidbody2D, Collider2D, detección de suelo 2D.</div>
+        <div class="tc-tags"><span class="tc-tag">2D</span><span class="tc-tag">salto</span><span class="tc-tag">plataformas</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span><span class="tc-pill project">Proyecto</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-3" href="#" onclick="openTopic('t3-7'); return false;">
+        <div class="tc-header"><div class="tc-icon">🎯</div><div class="tc-info"><div class="tc-num">T.3.7</div><div class="tc-title">Top-Down Movement</div></div></div>
+        <div class="tc-desc">Movimiento top-down 2D y 3D. Cámara fija. Movimiento relativo a la cámara. Click to move. Ideal para RPG/shooter.</div>
+        <div class="tc-tags"><span class="tc-tag">top-down</span><span class="tc-tag">camera</span><span class="tc-tag">click-to-move</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span><span class="tc-pill project">Proyecto</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-3" href="#" onclick="openTopic('t3-8'); return false;">
+        <div class="tc-header"><div class="tc-icon">🔫</div><div class="tc-info"><div class="tc-num">T.3.8</div><div class="tc-title">FPS Controller</div></div></div>
+        <div class="tc-desc">Movimiento FPS clásico. Mouse look, sensibilidad. Bloqueo del cursor. Integración con CharacterController.</div>
+        <div class="tc-tags"><span class="tc-tag">FPS</span><span class="tc-tag">mouseLook</span><span class="tc-tag">cursor</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-3" href="#" onclick="openTopic('t3-9'); return false;">
+        <div class="tc-header"><div class="tc-icon">🌊</div><div class="tc-info"><div class="tc-num">T.3.9</div><div class="tc-title">Física 2D</div></div></div>
+        <div class="tc-desc">Rigidbody2D, Collider2D, joints 2D, constraints. Diferencias con la física 3D. Proyectos de plataformas y puzzle.</div>
+        <div class="tc-tags"><span class="tc-tag">Rigidbody2D</span><span class="tc-tag">Collider2D</span><span class="tc-tag">joints</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div>
+      </a>
+      <a class="topic-card nivel-3" href="#" onclick="openTopic('t3-10'); return false;">
+        <div class="tc-header"><div class="tc-icon">☀️</div><div class="tc-info"><div class="tc-num">T.3.10</div><div class="tc-title">Raycast y Detección</div></div></div>
+        <div class="tc-desc">Physics.Raycast, RaycastHit, LayerMask. Raycast desde ratón. Debug.DrawRay. Casos en FPS y VR.</div>
+        <div class="tc-tags"><span class="tc-tag">Raycast</span><span class="tc-tag">LayerMask</span><span class="tc-tag">RaycastHit</span></div>
+        <div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════ NIVEL 4 ═══════ -->
+  <section class="section fade-in" id="nivel-4">
+    <div class="section-title">
+      <span class="level-badge lb-4">🎨 NIVEL 4</span>
+      <h2>SISTEMAS UNITY</h2>
+      <span class="section-tag">SISTEMAS</span>
+    </div>
+    <p class="section-desc">Animator, audio, UI, partículas, iluminación, DoTween, NavMesh. Los sistemas que hacen los juegos vivos.</p>
+    <div class="topics-grid">
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">🎭</div><div class="tc-info"><div class="tc-num">T.4.1</div><div class="tc-title">Animator y Transitions</div></div></div><div class="tc-desc">Controller, parámetros, transiciones, blend trees, layers. Conectar Animator con scripts C#.</div><div class="tc-tags"><span class="tc-tag">Animator</span><span class="tc-tag">blend tree</span><span class="tc-tag">layers</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">🎬</div><div class="tc-info"><div class="tc-num">T.4.2</div><div class="tc-title">Animation Clips y Curves</div></div></div><div class="tc-desc">Crear clips desde cero. Keyframes, curvas. Root motion. Animar desde código. Procedural animation intro.</div><div class="tc-tags"><span class="tc-tag">clips</span><span class="tc-tag">keyframes</span><span class="tc-tag">curves</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">🔊</div><div class="tc-info"><div class="tc-num">T.4.3</div><div class="tc-title">AudioSource y Mixers</div></div></div><div class="tc-desc">AudioSource, AudioClip, AudioMixer, snapshots, audio espacial. Pasos, música dinámica, efectos de entorno.</div><div class="tc-tags"><span class="tc-tag">AudioSource</span><span class="tc-tag">Mixer</span><span class="tc-tag">3D audio</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">🖼️</div><div class="tc-info"><div class="tc-num">T.4.4</div><div class="tc-title">UI — Canvas y Anchors</div></div></div><div class="tc-desc">Canvas Modes, anchors, responsive UI, Canvas Scaler. Diseñar UIs que se adapten a cualquier resolución.</div><div class="tc-tags"><span class="tc-tag">Canvas</span><span class="tc-tag">anchors</span><span class="tc-tag">responsive</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">🔘</div><div class="tc-info"><div class="tc-num">T.4.5</div><div class="tc-title">Botones, Sliders, TextMeshPro</div></div></div><div class="tc-desc">Button, Toggle, Slider, ScrollView, InputField. TextMeshPro: fuentes, rich text. Conectar UI con gameplay.</div><div class="tc-tags"><span class="tc-tag">Button</span><span class="tc-tag">TMP</span><span class="tc-tag">Slider</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">❤️</div><div class="tc-info"><div class="tc-num">T.4.6</div><div class="tc-title">Barras de Vida y HUD</div></div></div><div class="tc-desc">Sistema de barras de vida dinámicas. HUD completo con DoTween. Proyecto BarrasVida de Igor al completo.</div><div class="tc-tags"><span class="tc-tag">health</span><span class="tc-tag">HUD</span><span class="tc-tag">UI Image</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill project">Proyecto</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">✨</div><div class="tc-info"><div class="tc-num">T.4.7</div><div class="tc-title">Partículas y VFX</div></div></div><div class="tc-desc">Particle System: emisión, velocidad, color over lifetime. Fuego, humo, magia, explosiones. VFX Graph intro.</div><div class="tc-tags"><span class="tc-tag">Particles</span><span class="tc-tag">VFX</span><span class="tc-tag">fire</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">💡</div><div class="tc-info"><div class="tc-num">T.4.8</div><div class="tc-title">Iluminación 2D</div></div></div><div class="tc-desc">Global Light 2D, Point Light 2D, Freeform Light. Sombras 2D, normals, Sprite Lit Shader. Luces dinámicas.</div><div class="tc-tags"><span class="tc-tag">Light 2D</span><span class="tc-tag">normals</span><span class="tc-tag">shadows</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">🌟</div><div class="tc-info"><div class="tc-num">T.4.9</div><div class="tc-title">Post Processing</div></div></div><div class="tc-desc">Bloom, color grading, vignette, depth of field. URP Volume system. Crear atmósferas de cine para tu juego.</div><div class="tc-tags"><span class="tc-tag">PostPro</span><span class="tc-tag">bloom</span><span class="tc-tag">Volume</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">🎪</div><div class="tc-info"><div class="tc-num">T.4.10</div><div class="tc-title">DoTween</div></div></div><div class="tc-desc">DOMove, DORotate, DOFade, DOScale. Secuencias y callbacks. Animaciones de UI con DoTween. Game juice.</div><div class="tc-tags"><span class="tc-tag">DoTween</span><span class="tc-tag">Sequence</span><span class="tc-tag">Ease</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">🗺️</div><div class="tc-info"><div class="tc-num">T.4.11</div><div class="tc-title">NavMesh y Pathfinding</div></div></div><div class="tc-desc">NavMesh Surface, NavMesh Agent, NavMesh Obstacle. Pathfinding dinámico. NPCs que navegan el mundo.</div><div class="tc-tags"><span class="tc-tag">NavMesh</span><span class="tc-tag">Agent</span><span class="tc-tag">pathfinding</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span><span class="tc-pill project">Proyecto</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">🗂️</div><div class="tc-info"><div class="tc-num">T.4.12</div><div class="tc-title">Tilemap y 2D</div></div></div><div class="tc-desc">Tilemap, Tile Palette, Rule Tile. Colliders en tilemap. Interacciones con tilemaps desde C#. Mundos 2D procedurales.</div><div class="tc-tags"><span class="tc-tag">Tilemap</span><span class="tc-tag">RuleTile</span><span class="tc-tag">2D</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">🏗️</div><div class="tc-info"><div class="tc-num">T.4.13</div><div class="tc-title">ProBuilder</div></div></div><div class="tc-desc">Modelado directo en Unity. Blockout, prototipado, UVs, colisiones automáticas. Niveles sin Blender.</div><div class="tc-tags"><span class="tc-tag">ProBuilder</span><span class="tc-tag">blockout</span><span class="tc-tag">UVs</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">🎬</div><div class="tc-info"><div class="tc-num">T.4.14</div><div class="tc-title">SceneManagement</div></div></div><div class="tc-desc">LoadScene, UnloadScene, additive loading, pantallas de carga. DontDestroyOnLoad. GameManager con escenas.</div><div class="tc-tags"><span class="tc-tag">LoadScene</span><span class="tc-tag">additive</span><span class="tc-tag">GameManager</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-4" href="#"><div class="tc-header"><div class="tc-icon">📷</div><div class="tc-info"><div class="tc-num">T.4.15</div><div class="tc-title">Cinemachine</div></div></div><div class="tc-desc">Virtual Cameras, FreeLook, Follow, Composer. Cámaras FPS, TPS, top-down, RTS. Transiciones cinematográficas.</div><div class="tc-tags"><span class="tc-tag">Cinemachine</span><span class="tc-tag">VirtualCamera</span><span class="tc-tag">FreeLook</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+    </div>
+  </section>
+
+  <!-- ═══════ NIVEL 5 ═══════ -->
+  <section class="section fade-in" id="nivel-5">
+    <div class="section-title">
+      <span class="level-badge lb-5">🔥 NIVEL 5</span>
+      <h2>PROYECTOS REALES</h2>
+      <span class="section-tag">PROYECTOS</span>
+    </div>
+    <p class="section-desc">Construye juegos completos. Combate, RPG, IA enemiga, diálogos, guardado. Proyectos reales del aula de Igor.</p>
+    <div class="topics-grid">
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">⚔️</div><div class="tc-info"><div class="tc-num">T.5.1</div><div class="tc-title">Combate Melee y Hitboxes</div></div></div><div class="tc-desc">Sistema de combate melee completo. Hitboxes, hurtboxes, stamina, parry, dodge, recoil. Proyecto Combate de Igor.</div><div class="tc-tags"><span class="tc-tag">melee</span><span class="tc-tag">hitbox</span><span class="tc-tag">combos</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill project">Proyecto</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">🎒</div><div class="tc-info"><div class="tc-num">T.5.2</div><div class="tc-title">Inventario RPG</div></div></div><div class="tc-desc">Sistema de inventario con Drag&Drop. Objetos, stats, equipamiento. ScriptableObjects para items. UI de inventario.</div><div class="tc-tags"><span class="tc-tag">inventory</span><span class="tc-tag">DragDrop</span><span class="tc-tag">items</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill project">Proyecto</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">🤖</div><div class="tc-info"><div class="tc-num">T.5.3</div><div class="tc-title">IA Enemiga — State Machine</div></div></div><div class="tc-desc">Patrol, Chase, Attack. Finite State Machine. IA que detecta al jugador. Behaviour Trees intro. NavMesh integrado.</div><div class="tc-tags"><span class="tc-tag">FSM</span><span class="tc-tag">patrol</span><span class="tc-tag">AI</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill project">Proyecto</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">👤</div><div class="tc-info"><div class="tc-num">T.5.4</div><div class="tc-title">NPC Completo</div></div></div><div class="tc-desc">NPC con NavMesh, animaciones, diálogos, zona de interacción. El NPC completo del repo de Igor.</div><div class="tc-tags"><span class="tc-tag">NPC</span><span class="tc-tag">NavMesh</span><span class="tc-tag">diálogo</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill project">Proyecto</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">💬</div><div class="tc-info"><div class="tc-num">T.5.5</div><div class="tc-title">Sistema de Diálogos</div></div></div><div class="tc-desc">Dialogue trees, branching. Subtítulos con typewriter effect. Voice over. Cinemáticas con Timeline.</div><div class="tc-tags"><span class="tc-tag">diálogos</span><span class="tc-tag">branching</span><span class="tc-tag">Timeline</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill project">Proyecto</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">📦</div><div class="tc-info"><div class="tc-num">T.5.6</div><div class="tc-title">ScriptableObjects</div></div></div><div class="tc-desc">Arquitectura desacoplada con SO. Datos de armas, enemigos, items. Event channels. El patrón más potente de Unity.</div><div class="tc-tags"><span class="tc-tag">ScriptableObject</span><span class="tc-tag">events</span><span class="tc-tag">data</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">💾</div><div class="tc-info"><div class="tc-num">T.5.7</div><div class="tc-title">Sistema de Guardado</div></div></div><div class="tc-desc">PlayerPrefs, JSON, Binary Save System. Guardar y cargar el estado del juego. Cloud Save intro.</div><div class="tc-tags"><span class="tc-tag">PlayerPrefs</span><span class="tc-tag">JSON</span><span class="tc-tag">save</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">🎲</div><div class="tc-info"><div class="tc-num">T.5.8</div><div class="tc-title">Generación Procedural</div></div></div><div class="tc-desc">Dungeon generation, Perlin Noise, Wave Function Collapse. Quests procedurales. Terrain generation.</div><div class="tc-tags"><span class="tc-tag">procedural</span><span class="tc-tag">PerlinNoise</span><span class="tc-tag">WFC</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">🔫</div><div class="tc-info"><div class="tc-num">T.5.9</div><div class="tc-title">Shooter Top-Down Completo</div></div></div><div class="tc-desc">Shooter 2D top-down con enemigos, oleadas, puntuación, power-ups. El proyecto CampoTiro de Igor.</div><div class="tc-tags"><span class="tc-tag">shooter</span><span class="tc-tag">waves</span><span class="tc-tag">powerups</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill project">Proyecto</span><span class="tc-pill video">Vídeo</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">⚔️</div><div class="tc-info"><div class="tc-num">T.5.10</div><div class="tc-title">RPG con Stats y Quests</div></div></div><div class="tc-desc">Stats, skills, quests, facciones, economía. Sistema completo de RPG usando ScriptableObjects y SO events.</div><div class="tc-tags"><span class="tc-tag">RPG</span><span class="tc-tag">stats</span><span class="tc-tag">quests</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill project">Proyecto</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">🏃</div><div class="tc-info"><div class="tc-num">T.5.11</div><div class="tc-title">Plataformas 2D Completo</div></div></div><div class="tc-desc">Plataformas 2D completas: checkpoints, vidas, enemigos, items, UI. Del concepto al juego terminado.</div><div class="tc-tags"><span class="tc-tag">plataformas</span><span class="tc-tag">checkpoint</span><span class="tc-tag">vidas</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill project">Proyecto</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-5" href="#"><div class="tc-header"><div class="tc-icon">👻</div><div class="tc-info"><div class="tc-num">T.5.12</div><div class="tc-title">Survival Horror</div></div></div><div class="tc-desc">Atmósfera psicológica, sonido dinámico, IA impredecible, sanity system, luces dinámicas, terror procedural.</div><div class="tc-tags"><span class="tc-tag">horror</span><span class="tc-tag">sanity</span><span class="tc-tag">atmosphere</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill project">Proyecto</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div></a>
+    </div>
+  </section>
+
+  <!-- ═══════ NIVEL 6 ═══════ -->
+  <section class="section fade-in" id="nivel-6">
+    <div class="section-title">
+      <span class="level-badge lb-6">🚀 NIVEL 6</span>
+      <h2>EXPERTO ABSOLUTO</h2>
+      <span class="section-tag">AVANZADO</span>
+    </div>
+    <p class="section-desc">Delegates, ECS, Shader Graph, Multiplayer, ML Agents, VR. El nivel que separa a un desarrollador de un experto.</p>
+    <div class="topics-grid">
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">📡</div><div class="tc-info"><div class="tc-num">T.6.1</div><div class="tc-title">Delegates y Events</div></div></div><div class="tc-desc">delegate, multicast delegate, event, suscripción/desuscripción. Event Bus. Arquitectura por eventos en Unity.</div><div class="tc-tags"><span class="tc-tag">delegate</span><span class="tc-tag">event</span><span class="tc-tag">EventBus</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">⚡</div><div class="tc-info"><div class="tc-num">T.6.2</div><div class="tc-title">Action, Func, Predicate</div></div></div><div class="tc-desc">Action&lt;T&gt;, Func&lt;T,R&gt;, Predicate&lt;T&gt;. UnityEvent. Lambdas y expresiones. El repo de Igor en profundidad.</div><div class="tc-tags"><span class="tc-tag">Action</span><span class="tc-tag">Func</span><span class="tc-tag">UnityEvent</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">🔍</div><div class="tc-info"><div class="tc-num">T.6.3</div><div class="tc-title">LINQ y Lambdas</div></div></div><div class="tc-desc">LINQ en Unity: Where, Select, OrderBy, GroupBy. Lambdas, closures. Cuándo usar y cuándo evitar LINQ en runtime.</div><div class="tc-tags"><span class="tc-tag">LINQ</span><span class="tc-tag">lambda</span><span class="tc-tag">Where</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">⏳</div><div class="tc-info"><div class="tc-num">T.6.4</div><div class="tc-title">Async / Await / Tasks</div></div></div><div class="tc-desc">async/await en Unity, Tasks, CancellationToken, threading básico. Race conditions. vs Coroutines.</div><div class="tc-tags"><span class="tc-tag">async</span><span class="tc-tag">await</span><span class="tc-tag">Task</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">🏛️</div><div class="tc-info"><div class="tc-num">T.6.5</div><div class="tc-title">Patrones de Diseño</div></div></div><div class="tc-desc">Singleton, Observer, Factory, Strategy, Command, State, Object Pooling. Dependency Injection. SOLID en Unity.</div><div class="tc-tags"><span class="tc-tag">Singleton</span><span class="tc-tag">Observer</span><span class="tc-tag">SOLID</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">🎨</div><div class="tc-info"><div class="tc-num">T.6.6</div><div class="tc-title">Shader Graph</div></div></div><div class="tc-desc">URP Shader Graph desde cero. Toon shader, dissolve, holograma, agua, outlines. HLSL cuando el nodo no es suficiente.</div><div class="tc-tags"><span class="tc-tag">ShaderGraph</span><span class="tc-tag">HLSL</span><span class="tc-tag">toon</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">💫</div><div class="tc-info"><div class="tc-num">T.6.7</div><div class="tc-title">VFX Graph</div></div></div><div class="tc-desc">Partículas GPU con VFX Graph. Rayos, magia, humo volumétrico, fuego procedural. Performance extrema.</div><div class="tc-tags"><span class="tc-tag">VFXGraph</span><span class="tc-tag">GPU</span><span class="tc-tag">particles</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">📦</div><div class="tc-info"><div class="tc-num">T.6.8</div><div class="tc-title">Addressables</div></div></div><div class="tc-desc">Carga dinámica de assets, bundles, remote content. Memory optimization. Mundos abiertos sin carga visible.</div><div class="tc-tags"><span class="tc-tag">Addressables</span><span class="tc-tag">bundles</span><span class="tc-tag">streaming</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">⚡</div><div class="tc-info"><div class="tc-num">T.6.9</div><div class="tc-title">ECS y DOTS</div></div></div><div class="tc-desc">Entity Component System. Jobs System, Burst Compiler. Cuándo y por qué usar DOTS. Comparativa con OOP.</div><div class="tc-tags"><span class="tc-tag">ECS</span><span class="tc-tag">DOTS</span><span class="tc-tag">Jobs</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">🌐</div><div class="tc-info"><div class="tc-num">T.6.10</div><div class="tc-title">Multiplayer — Netcode</div></div></div><div class="tc-desc">Netcode for GameObjects, Photon. Sincronización, lag compensation, authoritative server. Matchmaking y lobby.</div><div class="tc-tags"><span class="tc-tag">Netcode</span><span class="tc-tag">Photon</span><span class="tc-tag">sync</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill project">Proyecto</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">🧠</div><div class="tc-info"><div class="tc-num">T.6.11</div><div class="tc-title">ML Agents</div></div></div><div class="tc-desc">Machine Learning Agents en Unity. Reinforcement learning, entrenamiento de IA. NPCs que aprenden a jugar.</div><div class="tc-tags"><span class="tc-tag">MLAgents</span><span class="tc-tag">RL</span><span class="tc-tag">training</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill simulator">Simulador</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">🥽</div><div class="tc-info"><div class="tc-num">T.6.12</div><div class="tc-title">VR con XR Toolkit</div></div></div><div class="tc-desc">XR Interaction Toolkit. VR locomotion, hand tracking, Raycast VR. El VRiftRaycastController.cs de Igor.</div><div class="tc-tags"><span class="tc-tag">VR</span><span class="tc-tag">XR</span><span class="tc-tag">handtracking</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">📊</div><div class="tc-info"><div class="tc-num">T.6.13</div><div class="tc-title">Optimización y Profiler</div></div></div><div class="tc-desc">CPU/GPU profiling, draw calls, SRP batching, LOD, occlusion culling, memory snapshots. Frame Debugger.</div><div class="tc-tags"><span class="tc-tag">Profiler</span><span class="tc-tag">LOD</span><span class="tc-tag">batching</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">🛠️</div><div class="tc-info"><div class="tc-num">T.6.14</div><div class="tc-title">Custom Editor Tools</div></div></div><div class="tc-desc">Custom inspectors, property drawers, editor windows, gizmos. Automatizar el flujo de trabajo del equipo.</div><div class="tc-tags"><span class="tc-tag">Editor</span><span class="tc-tag">CustomInspector</span><span class="tc-tag">Gizmos</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">📤</div><div class="tc-info"><div class="tc-num">T.6.15</div><div class="tc-title">Builds y Publicación</div></div></div><div class="tc-desc">Build para PC, Android, iOS. Steam y itch.io. Optimización móvil, splash screen, certificaciones.</div><div class="tc-tags"><span class="tc-tag">Build</span><span class="tc-tag">Steam</span><span class="tc-tag">Android</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span><span class="tc-pill practice">Práctica</span></div><span class="tc-check">▶</span></div></a>
+      <a class="topic-card nivel-6" href="#"><div class="tc-header"><div class="tc-icon">💼</div><div class="tc-info"><div class="tc-num">T.6.16</div><div class="tc-title">Portfolio y Mundo Laboral</div></div></div><div class="tc-desc">Portfolio técnico, demo reel, GitHub profesional, entrevistas técnicas, pruebas Unity. Preparación real para la industria.</div><div class="tc-tags"><span class="tc-tag">portfolio</span><span class="tc-tag">entrevista</span><span class="tc-tag">industria</span></div><div class="tc-footer"><div class="tc-pills"><span class="tc-pill theory">Teoría</span></div><span class="tc-check">▶</span></div></a>
+    </div>
+  </section>
+
+  <!-- ═══════ GAMIFICACIÓN ═══════ -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <h2>MECÁNICAS DE IGOR</h2>
+      <span class="section-tag">GAMIFICACIÓN</span>
+    </div>
+    <p class="section-desc">Como en tus otros cursos. IgorPoints, logros, rachas, premios reales.</p>
+    <div class="gamification">
+      <div class="game-card">
+        <span class="gc-icon">⭐</span>
+        <div class="gc-title">IGORPOINTS</div>
+        <div class="gc-desc">Gana puntos por cada ejercicio, simulador y proyecto. Acumula para desbloquear premios de Igor.</div>
+      </div>
+      <div class="game-card">
+        <span class="gc-icon">🏅</span>
+        <div class="gc-title">LOGROS</div>
+        <div class="gc-desc">Badges por módulo completado. GameObject Master, Physics Pro, C# Wizard, Unity Expert...</div>
+      </div>
+      <div class="game-card">
+        <span class="gc-icon">🔥</span>
+        <div class="gc-title">RACHAS</div>
+        <div class="gc-desc">Mantén tu racha diaria. Bonus de IgorPoints por rachas de 5, 10 y 30 días seguidos.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ FOOTER ═══════ -->
+  <footer>
+    <div class="f-logo">IGOR<span>UNITY</span></div>
+    <div class="f-text">// De 0 a Experto · 82 temas · 7 niveles · hecho con ❤️ por Igor</div>
+    <div class="f-text">github.com/igorhermoso1/Unity2025_formaci-n</div>
+  </footer>
+
+</main>
+</div>
+
+<!-- ═══════════════ MODAL ═══════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalContent">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+const state = {
+  igorPoints: parseInt(localStorage.getItem('iu_points') || '0'),
+  xp: parseInt(localStorage.getItem('iu_xp') || '0'),
+  completed: JSON.parse(localStorage.getItem('iu_completed') || '[]'),
+  streak: parseInt(localStorage.getItem('iu_streak') || '0'),
+  achievements: JSON.parse(localStorage.getItem('iu_achievements') || '[]'),
+};
+
+// ── TOPIC DATA COMPLETO ──
+const TOPICS = {
+  // ══ NIVEL 0 ══
+  't0-1': {
+    title: '¿Qué es Unity?', nivel: '0 — El Editor', points: 20,
+    video: null,
+    desc: 'Motor gráfico en tiempo real. Diferencias clave con Unreal y Godot. Versiones LTS vs TECH.',
+    theory: `<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:14px">Unity es un <strong style="color:var(--text)">motor gráfico en tiempo real</strong> que permite crear videojuegos 2D, 3D, VR y AR. A diferencia de un framework (solo código) o una librería (resuelve un problema concreto), un motor es un entorno completo.</p>
+    <div style="background:var(--bg4);border-left:3px solid var(--unity);border-radius:0 var(--r) var(--r) 0;padding:14px;font-family:var(--mono);font-size:12px;margin-bottom:14px">
+      <span style="color:var(--unity)">Motor</span> = Editor visual + Runtime + Herramientas completas<br>
+      <span style="color:#a78bfa">Framework</span> = Solo código, sin editor<br>
+      <span style="color:var(--gold)">Librería</span> = Resuelve un problema específico
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:var(--unity-dim);border:1px solid rgba(61,220,132,0.2);border-radius:var(--r);padding:12px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--unity);margin-bottom:4px">✅ LTS — Long Term Support</div>
+        <div style="font-size:12px;color:var(--text2)">Estable. Para producción. Soporte 2 años. <strong style="color:var(--text)">Recomendada para aprender.</strong></div>
+      </div>
+      <div style="background:var(--igor-dim);border:1px solid rgba(124,58,237,0.2);border-radius:var(--r);padding:12px">
+        <div style="font-family:var(--mono);font-size:11px;color:#a78bfa;margin-bottom:4px">⚠️ TECH — Técnica</div>
+        <div style="font-size:12px;color:var(--text2)">Novedades. Menos estable. Solo si necesitas una feature específica nueva.</div>
+      </div>
+    </div>`,
+    exercise: `<p style="color:var(--text2);font-size:13px;margin-bottom:12px">Completa la frase correcta:</p>
+    <div id="ex-t01" style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">A) Unity es una librería de JavaScript para hacer webs</button>
+      <button onclick="checkAnswer(this,'correct')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">B) Unity es un motor gráfico en tiempo real multiplataforma</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">C) Unity es solo un framework de física 3D</button>
+    </div>`
+  },
+  't0-2': {
+    title: 'Instalación y Unity Hub', nivel: '0 — El Editor', points: 20,
+    video: null,
+    desc: 'Descarga, instalación del Hub, gestión de versiones, creación de proyectos y plantillas.',
+    theory: `<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:14px">Unity Hub es el <strong style="color:var(--text)">gestor central</strong> de todas tus instalaciones de Unity. Desde aquí gestionas versiones, proyectos y licencias.</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+      ${['1. Descarga Unity Hub desde unity.com/download','2. Instala la versión LTS más reciente (añade Android/iOS si los necesitas)','3. Activa la licencia gratuita Personal','4. Crea un proyecto nuevo → selecciona plantilla'].map((s,i)=>`<div style="display:flex;gap:10px;align-items:center;background:var(--bg4);border-radius:var(--r);padding:10px 14px"><span style="font-family:var(--mono);font-size:11px;color:var(--unity);min-width:20px">${i+1}</span><span style="font-size:13px;color:var(--text2)">${s.substring(3)}</span></div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      ${[['URP','Universal — el más usado hoy. Móvil, PC, consolas.','#3ddc84'],['HDRP','High Definition. Solo PC/consola potente. AAA.','#38bdf8'],['Built-In','El clásico. Aprende con él si tu PC es modesto.','#f59e0b']].map(([n,d,c])=>`<div style="background:var(--bg4);border:1px solid var(--border);border-top:2px solid ${c};border-radius:0 0 var(--r) var(--r);padding:10px"><div style="font-family:var(--mono);font-size:11px;color:${c};margin-bottom:4px">${n}</div><div style="font-size:11px;color:var(--text2)">${d}</div></div>`).join('')}
+    </div>`,
+    exercise: `<p style="color:var(--text2);font-size:13px;margin-bottom:12px">¿Qué plantilla recomienda Igor para empezar a aprender?</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">A) HDRP — siempre la más avanzada</button>
+      <button onclick="checkAnswer(this,'correct')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">B) URP — la más equilibrada y moderna</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">C) Da igual, todas son iguales</button>
+    </div>`
+  },
+  't0-3': {
+    title: 'Interfaz — Ventanas', nivel: '0 — El Editor', points: 25,
+    video: null,
+    desc: 'Hierarchy, Scene, Game View, Inspector, Project, Console, Package Manager. Layouts y shortcuts.',
+    theory: `<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:14px">El editor de Unity tiene <strong style="color:var(--text)">6 ventanas esenciales</strong>. Cada una tiene un rol específico que debes conocer perfectamente.</p>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${[
+        ['🌳 Hierarchy','Lista de todos los GameObjects de la escena activa. Tu árbol de objetos.','#38bdf8'],
+        ['🎬 Scene View','Vista 3D/2D donde construyes y navegas tu mundo. Tu lienzo.','#3ddc84'],
+        ['🎮 Game View','Previsualización de cómo verá el jugador el juego. Pulsa ▶ para jugar.','#f59e0b'],
+        ['🔍 Inspector','Propiedades del objeto seleccionado. Aquí editas componentes.','#a78bfa'],
+        ['📁 Project','Assets del proyecto: scripts, texturas, prefabs, sonidos...','#f97316'],
+        ['⚠️ Console','Logs, errores y warnings de tus scripts. Tu mejor amigo para debugging.','#ef4444'],
+      ].map(([n,d,c])=>`<div style="display:flex;gap:10px;background:var(--bg4);border-radius:var(--r);padding:10px;border-left:2px solid ${c}"><div style="min-width:130px;font-size:13px;color:${c};font-family:var(--mono)">${n}</div><div style="font-size:12px;color:var(--text2)">${d}</div></div>`).join('')}
+    </div>`,
+    exercise: `<p style="color:var(--text2);font-size:13px;margin-bottom:12px">¿Dónde ves los errores de tus scripts en Unity?</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">A) En el Inspector</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">B) En la Hierarchy</button>
+      <button onclick="checkAnswer(this,'correct')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">C) En la Console</button>
+    </div>`,
+    simulator: 'editor-sim'
+  },
+  't2-1': {
+    title: 'Intro a C# en Unity', nivel: '2 — C# Scripting', points: 25,
+    video: 'bhYQVgtLHY0',
+    desc: 'Primer script Unity. Debug.Log. Estructura de MonoBehaviour. Visual Studio / Rider.',
+    theory: `<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:14px">Un script de Unity es una <strong style="color:var(--text)">clase C# que hereda de MonoBehaviour</strong>. Esto le da acceso a todos los métodos del ciclo de vida de Unity.</p>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-family:var(--mono);font-size:13px;line-height:1.8;margin-bottom:14px">
+      <span style="color:#569cd6">using</span> <span style="color:#4ec9b0">UnityEngine</span>;<br><br>
+      <span style="color:#569cd6">public class</span> <span style="color:#4ec9b0">MiPrimerScript</span> : <span style="color:#4ec9b0">MonoBehaviour</span><br>
+      {<br>
+      &nbsp;&nbsp;<span style="color:#569cd6">void</span> <span style="color:#dcdcaa">Start</span>()<br>
+      &nbsp;&nbsp;{<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#4ec9b0">Debug</span>.<span style="color:#dcdcaa">Log</span>(<span style="color:#ce9178">"¡Hola desde Unity!"</span>);<br>
+      &nbsp;&nbsp;}<br><br>
+      &nbsp;&nbsp;<span style="color:#569cd6">void</span> <span style="color:#dcdcaa">Update</span>()<br>
+      &nbsp;&nbsp;{<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6a9955">// Se ejecuta cada frame</span><br>
+      &nbsp;&nbsp;}<br>
+      }
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="background:var(--unity-dim);border:1px solid rgba(61,220,132,0.2);border-radius:var(--r);padding:10px"><div style="font-family:var(--mono);font-size:11px;color:var(--unity)">Start()</div><div style="font-size:12px;color:var(--text2);margin-top:4px">Se ejecuta UNA vez al iniciar. Inicializar variables.</div></div>
+      <div style="background:var(--igor-dim);border:1px solid rgba(124,58,237,0.2);border-radius:var(--r);padding:10px"><div style="font-family:var(--mono);font-size:11px;color:#a78bfa">Update()</div><div style="font-size:12px;color:var(--text2);margin-top:4px">Se ejecuta CADA FRAME. Movimiento, input, lógica continua.</div></div>
+    </div>`,
+    exercise: `<p style="color:var(--text2);font-size:13px;margin-bottom:12px">¿Qué método se ejecuta una sola vez al inicio del juego?</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="checkAnswer(this,'correct')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">A) Start()</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">B) Update()</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">C) FixedUpdate()</button>
+    </div>`
+  },
+  't2-6': {
+    title: 'Clases y Objetos', nivel: '2 — C# Scripting', points: 30,
+    video: 'oNHU653z7hk',
+    desc: 'Clases en C#. Constructores, getters/setters. El ejemplo Pokémon de Igor.',
+    theory: `<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:14px">Una <strong style="color:var(--text)">clase</strong> es un molde para crear objetos. En Unity usamos clases todo el tiempo, desde tus scripts hasta los componentes.</p>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-family:var(--mono);font-size:12px;line-height:1.8;margin-bottom:14px">
+      <span style="color:#569cd6">public class</span> <span style="color:#4ec9b0">Pokemon</span><br>
+      {<br>
+      &nbsp;&nbsp;<span style="color:#569cd6">private string</span> <span style="color:#9cdcfe">nombre</span>;<br>
+      &nbsp;&nbsp;<span style="color:#569cd6">private int</span> <span style="color:#9cdcfe">nivel</span>;<br><br>
+      &nbsp;&nbsp;<span style="color:#6a9955">// Constructor</span><br>
+      &nbsp;&nbsp;<span style="color:#569cd6">public</span> <span style="color:#dcdcaa">Pokemon</span>(<span style="color:#569cd6">string</span> <span style="color:#9cdcfe">n</span>, <span style="color:#569cd6">int</span> <span style="color:#9cdcfe">niv</span>)<br>
+      &nbsp;&nbsp;{<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#9cdcfe">nombre</span> = <span style="color:#9cdcfe">n</span>;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#9cdcfe">nivel</span> = <span style="color:#9cdcfe">niv</span>;<br>
+      &nbsp;&nbsp;}<br><br>
+      &nbsp;&nbsp;<span style="color:#569cd6">public string</span> <span style="color:#9cdcfe">Nombre</span> =&gt; <span style="color:#9cdcfe">nombre</span>;<br>
+      }
+    </div>
+    <div style="background:var(--gold-dim);border:1px solid rgba(245,158,11,0.2);border-radius:var(--r);padding:12px;font-size:13px;color:var(--text2)">
+      💡 <strong style="color:var(--gold)">Igor tip:</strong> Usa <code style="color:var(--unity)">private</code> para los atributos y expón solo lo necesario con propiedades públicas. Principio de encapsulación.
+    </div>`,
+    exercise: `<p style="color:var(--text2);font-size:13px;margin-bottom:12px">¿Qué es un constructor en C#?</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">A) Un método que destruye el objeto</button>
+      <button onclick="checkAnswer(this,'correct')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">B) Un método especial que inicializa el objeto al crearlo</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">C) Una variable estática de la clase</button>
+    </div>`
+  },
+  't2-9': {
+    title: 'MonoBehaviour — Ciclo de Vida', nivel: '2 — C# Scripting', points: 30,
+    video: 'bhYQVgtLHY0',
+    desc: 'Awake, Start, Update, FixedUpdate, LateUpdate. Cuándo usar cada uno.',
+    theory: `<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:14px">MonoBehaviour tiene un <strong style="color:var(--text)">ciclo de vida muy preciso</strong>. Entenderlo es esencial para evitar bugs extraños.</p>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+      ${[
+        ['Awake()','Primero de todo. Incluso si el objeto está desactivado. Para inicializar referencias.','#ef4444'],
+        ['OnEnable()','Cada vez que el objeto se activa.','#f97316'],
+        ['Start()','Una vez, en el primer frame activo. Usa datos ya inicializados por Awake.','#f59e0b'],
+        ['Update()','Cada frame. Input, lógica de juego, movimiento sin física.','#3ddc84'],
+        ['FixedUpdate()','Intervalo fijo (0.02s). Siempre para física con Rigidbody.','#38bdf8'],
+        ['LateUpdate()','Después de todos los Update. Perfecto para la cámara.','#a78bfa'],
+        ['OnDestroy()','Al destruirse el objeto. Limpia referencias y suscripciones.','#6b7280'],
+      ].map(([n,d,c])=>`<div style="display:flex;gap:10px;background:var(--bg4);border-radius:var(--r);padding:8px 12px;border-left:2px solid ${c}"><code style="min-width:120px;font-size:12px;color:${c}">${n}</code><span style="font-size:12px;color:var(--text2)">${d}</span></div>`).join('')}
+    </div>`,
+    simulator: 'lifecycle-sim',
+    exercise: `<p style="color:var(--text2);font-size:13px;margin-bottom:12px">¿Qué método debes usar para mover un Rigidbody?</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">A) Update()</button>
+      <button onclick="checkAnswer(this,'correct')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">B) FixedUpdate()</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">C) LateUpdate()</button>
+    </div>`
+  },
+  't3-2': {
+    title: 'Lerp y SmoothDamp', nivel: '3 — Movimiento', points: 30,
+    video: null,
+    desc: 'Vector3.Lerp, SmoothDamp, MoveTowards. Interpolación fluida para cámara y movimiento.',
+    theory: `<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:14px"><strong style="color:var(--text)">Lerp</strong> (Linear Interpolation) interpola linealmente entre dos valores usando un factor t entre 0 y 1.</p>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-family:var(--mono);font-size:12px;line-height:1.9;margin-bottom:14px">
+      <span style="color:#6a9955">// Lerp clásico — suaviza pero nunca llega</span><br>
+      <span style="color:#9cdcfe">transform</span>.<span style="color:#9cdcfe">position</span> = <span style="color:#4ec9b0">Vector3</span>.<span style="color:#dcdcaa">Lerp</span>(<br>
+      &nbsp;&nbsp;<span style="color:#9cdcfe">transform</span>.<span style="color:#9cdcfe">position</span>,<br>
+      &nbsp;&nbsp;<span style="color:#9cdcfe">objetivo</span>.<span style="color:#9cdcfe">position</span>,<br>
+      &nbsp;&nbsp;<span style="color:#b5cea8">5f</span> * <span style="color:#4ec9b0">Time</span>.<span style="color:#9cdcfe">deltaTime</span><br>
+      );<br><br>
+      <span style="color:#6a9955">// SmoothDamp — llega suavemente y para</span><br>
+      <span style="color:#9cdcfe">pos</span> = <span style="color:#4ec9b0">Vector3</span>.<span style="color:#dcdcaa">SmoothDamp</span>(<span style="color:#9cdcfe">pos</span>, <span style="color:#9cdcfe">target</span>, <span style="color:#569cd6">ref</span> <span style="color:#9cdcfe">vel</span>, <span style="color:#b5cea8">0.3f</span>);
+    </div>`,
+    simulator: 'lerp-sim',
+    exercise: `<p style="color:var(--text2);font-size:13px;margin-bottom:12px">Si t=0 en Vector3.Lerp(A, B, t), ¿qué devuelve?</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="checkAnswer(this,'correct')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">A) A — el punto de origen</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">B) B — el punto de destino</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">C) El punto medio entre A y B</button>
+    </div>`
+  },
+  't3-5': {
+    title: 'Colisiones y Triggers', nivel: '3 — Movimiento', points: 30,
+    video: 'Q1U-I1Bd-S8',
+    desc: 'OnCollisionEnter vs OnTriggerEnter. Diferencias clave. Agua, niebla y zonas de trigger.',
+    theory: `<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:14px">En Unity existen dos formas de detectar contacto entre objetos: <strong style="color:var(--text)">Collision</strong> (física real) y <strong style="color:var(--text)">Trigger</strong> (zona sin colisión física).</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="background:var(--bg4);border-top:2px solid #3ddc84;border-radius:0 0 var(--r) var(--r);padding:12px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--unity);margin-bottom:6px">COLLISION</div>
+        <div style="background:var(--bg);border-radius:var(--r);padding:10px;font-family:var(--mono);font-size:11px;line-height:1.7;margin-bottom:6px"><span style="color:#dcdcaa">OnCollisionEnter</span>(Collision c)<br><span style="color:#dcdcaa">OnCollisionStay</span>(Collision c)<br><span style="color:#dcdcaa">OnCollisionExit</span>(Collision c)</div>
+        <div style="font-size:11px;color:var(--text2)">Requiere Rigidbody. Tiene física real. Los objetos rebotan.</div>
+      </div>
+      <div style="background:var(--bg4);border-top:2px solid #f59e0b;border-radius:0 0 var(--r) var(--r);padding:12px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--gold);margin-bottom:6px">TRIGGER</div>
+        <div style="background:var(--bg);border-radius:var(--r);padding:10px;font-family:var(--mono);font-size:11px;line-height:1.7;margin-bottom:6px"><span style="color:#dcdcaa">OnTriggerEnter</span>(Collider c)<br><span style="color:#dcdcaa">OnTriggerStay</span>(Collider c)<br><span style="color:#dcdcaa">OnTriggerExit</span>(Collider c)</div>
+        <div style="font-size:11px;color:var(--text2)">isTrigger = true. Sin física. Zonas: agua, daño, eventos.</div>
+      </div>
+    </div>
+    <div style="background:var(--gold-dim);border:1px solid rgba(245,158,11,0.2);border-radius:var(--r);padding:12px;font-size:13px;color:var(--text2)">
+      💡 <strong style="color:var(--gold)">Regla de oro:</strong> Al menos uno de los dos objetos debe tener <code style="color:var(--unity)">Rigidbody</code> para que se detecte el evento.
+    </div>`,
+    exercise: `<p style="color:var(--text2);font-size:13px;margin-bottom:12px">Para crear una zona de agua que el jugador pueda atravesar sin rebotar, ¿qué usas?</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">A) OnCollisionEnter — es para cualquier contacto</button>
+      <button onclick="checkAnswer(this,'correct')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">B) OnTriggerEnter con isTrigger = true</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">C) No necesitas colisión, solo un script en Update</button>
+    </div>`
+  },
+  't4-1': {
+    title: 'Animator y Transitions', nivel: '4 — Sistemas Unity', points: 35,
+    video: 'bQCqwUfdLFc',
+    desc: 'Animator Controller, parámetros, transiciones, blend trees, layers.',
+    theory: `<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:14px">El <strong style="color:var(--text)">Animator Controller</strong> es una máquina de estados que controla qué animación se reproduce en cada momento.</p>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-family:var(--mono);font-size:12px;line-height:1.9;margin-bottom:14px">
+      <span style="color:#6a9955">// Obtener referencia al Animator</span><br>
+      <span style="color:#569cd6">private</span> <span style="color:#4ec9b0">Animator</span> <span style="color:#9cdcfe">anim</span>;<br><br>
+      <span style="color:#569cd6">void</span> <span style="color:#dcdcaa">Start</span>() => <span style="color:#9cdcfe">anim</span> = <span style="color:#dcdcaa">GetComponent</span>&lt;<span style="color:#4ec9b0">Animator</span>&gt;();<br><br>
+      <span style="color:#6a9955">// Activar parámetros desde código</span><br>
+      <span style="color:#9cdcfe">anim</span>.<span style="color:#dcdcaa">SetBool</span>(<span style="color:#ce9178">"isRunning"</span>, <span style="color:#569cd6">true</span>);<br>
+      <span style="color:#9cdcfe">anim</span>.<span style="color:#dcdcaa">SetFloat</span>(<span style="color:#ce9178">"speed"</span>, <span style="color:#9cdcfe">velocidad</span>);<br>
+      <span style="color:#9cdcfe">anim</span>.<span style="color:#dcdcaa">SetTrigger</span>(<span style="color:#ce9178">"jump"</span>);
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      ${[['Bool','Estado continuo: isRunning, isGrounded','#38bdf8'],['Float','Valores: speed, direction para Blend Trees','#3ddc84'],['Int','Selección: 0=idle, 1=walk, 2=run','#f59e0b'],['Trigger','Evento puntual: salto, ataque, daño','#ef4444']].map(([n,d,c])=>`<div style="background:var(--bg4);border-radius:var(--r);padding:10px;border-left:2px solid ${c}"><code style="font-size:11px;color:${c}">${n}</code><div style="font-size:11px;color:var(--text2);margin-top:3px">${d}</div></div>`).join('')}
+    </div>`,
+    exercise: `<p style="color:var(--text2);font-size:13px;margin-bottom:12px">¿Qué tipo de parámetro usarías para un salto (evento puntual)?</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">A) Bool</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">B) Float</button>
+      <button onclick="checkAnswer(this,'correct')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">C) Trigger</button>
+    </div>`
+  },
+  't4-3': {
+    title: 'AudioSource y Mixers', nivel: '4 — Sistemas Unity', points: 30,
+    video: '1iuljF_PQGc',
+    desc: 'AudioSource, AudioClip, AudioMixer, snapshots, audio espacial.',
+    theory: `<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:14px">Unity tiene un sistema de audio completo. El <strong style="color:var(--text)">AudioSource</strong> es el componente que emite sonido, y el <strong style="color:var(--text)">AudioMixer</strong> mezcla y procesa los canales.</p>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-family:var(--mono);font-size:12px;line-height:1.9;margin-bottom:14px">
+      <span style="color:#569cd6">private</span> <span style="color:#4ec9b0">AudioSource</span> <span style="color:#9cdcfe">audio</span>;<br>
+      <span style="color:#569cd6">public</span> <span style="color:#4ec9b0">AudioClip</span> <span style="color:#9cdcfe">jumpSound</span>;<br><br>
+      <span style="color:#6a9955">// Reproducir un sonido puntual</span><br>
+      <span style="color:#9cdcfe">audio</span>.<span style="color:#dcdcaa">PlayOneShot</span>(<span style="color:#9cdcfe">jumpSound</span>);<br><br>
+      <span style="color:#6a9955">// Música en loop</span><br>
+      <span style="color:#9cdcfe">audio</span>.<span style="color:#9cdcfe">clip</span> = <span style="color:#9cdcfe">musicaFondo</span>;<br>
+      <span style="color:#9cdcfe">audio</span>.<span style="color:#9cdcfe">loop</span> = <span style="color:#569cd6">true</span>;<br>
+      <span style="color:#9cdcfe">audio</span>.<span style="color:#dcdcaa">Play</span>();
+    </div>`,
+    exercise: `<p style="color:var(--text2);font-size:13px;margin-bottom:12px">¿Qué método usas para reproducir un efecto de sonido puntual sin cortar el actual?</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">A) audio.Play()</button>
+      <button onclick="checkAnswer(this,'correct')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">B) audio.PlayOneShot(clip)</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">C) audio.Stop()</button>
+    </div>`
+  },
+  't4-10': {
+    title: 'DoTween', nivel: '4 — Sistemas Unity', points: 35,
+    video: 'szXuwLNyG8U',
+    desc: 'DOMove, DORotate, DOFade, DOScale, Sequences. Animaciones de UI con DoTween.',
+    theory: `<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:14px"><strong style="color:var(--text)">DoTween</strong> es la librería de animación más popular de Unity. Permite animar cualquier valor con una línea de código.</p>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-family:var(--mono);font-size:12px;line-height:1.9;margin-bottom:14px">
+      <span style="color:#6a9955">// Mover a posición en 1 segundo</span><br>
+      <span style="color:#9cdcfe">transform</span>.<span style="color:#dcdcaa">DOMove</span>(<span style="color:#569cd6">new</span> <span style="color:#4ec9b0">Vector3</span>(<span style="color:#b5cea8">5</span>,<span style="color:#b5cea8">0</span>,<span style="color:#b5cea8">0</span>), <span style="color:#b5cea8">1f</span>);<br><br>
+      <span style="color:#6a9955">// Escalar con ease rebote</span><br>
+      <span style="color:#9cdcfe">transform</span>.<span style="color:#dcdcaa">DOScale</span>(<span style="color:#4ec9b0">Vector3</span>.<span style="color:#9cdcfe">one</span> * <span style="color:#b5cea8">1.2f</span>, <span style="color:#b5cea8">0.3f</span>)<br>
+      &nbsp;&nbsp;.<span style="color:#dcdcaa">SetEase</span>(<span style="color:#4ec9b0">Ease</span>.<span style="color:#9cdcfe">OutBounce</span>);<br><br>
+      <span style="color:#6a9955">// Secuencia: aparece, espera, desaparece</span><br>
+      <span style="color:#569cd6">var</span> <span style="color:#9cdcfe">seq</span> = <span style="color:#4ec9b0">DOTween</span>.<span style="color:#dcdcaa">Sequence</span>();<br>
+      <span style="color:#9cdcfe">seq</span>.<span style="color:#dcdcaa">Append</span>(<span style="color:#9cdcfe">canvasGroup</span>.<span style="color:#dcdcaa">DOFade</span>(<span style="color:#b5cea8">1</span>, <span style="color:#b5cea8">0.5f</span>));<br>
+      <span style="color:#9cdcfe">seq</span>.<span style="color:#dcdcaa">AppendInterval</span>(<span style="color:#b5cea8">2f</span>);<br>
+      <span style="color:#9cdcfe">seq</span>.<span style="color:#dcdcaa">Append</span>(<span style="color:#9cdcfe">canvasGroup</span>.<span style="color:#dcdcaa">DOFade</span>(<span style="color:#b5cea8">0</span>, <span style="color:#b5cea8">0.5f</span>));
+    </div>`,
+    exercise: `<p style="color:var(--text2);font-size:13px;margin-bottom:12px">¿Cómo animas varias acciones seguidas en DoTween?</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">A) Llamas a DOMove varias veces seguidas</button>
+      <button onclick="checkAnswer(this,'correct')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px;font-family:var(--mono)">B) Usas DOTween.Sequence() con Append</button>
+      <button onclick="checkAnswer(this,'wrong')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text2);cursor:pointer;text-align:left;font-size:13px">C) Necesitas una Coroutine obligatoriamente</button>
+    </div>`
+  },
+};
+
+// ── ACHIEVEMENTS ──
+const ACHIEVEMENTS_DEF = [
+  {id:'first_step', title:'Primer Paso', desc:'Completa tu primer tema', icon:'🎯', condition: s => s.completed.length >= 1, points:50},
+  {id:'rookie', title:'Rookie Unity', desc:'Completa el Nivel 0 completo', icon:'🖥️', condition: s => ['t0-1','t0-2','t0-3','t0-4','t0-5','t0-6','t0-7','t0-8'].every(t=>s.completed.includes(t)), points:150},
+  {id:'csharp_init', title:'C# Initiate', desc:'Completa 5 temas de scripting', icon:'⚙️', condition: s => s.completed.filter(t=>t.startsWith('t2-')).length >= 5, points:100},
+  {id:'centurion', title:'Centurión', desc:'Alcanza 100 IgorPoints', icon:'💯', condition: s => s.igorPoints >= 100, points:0},
+  {id:'streak_5', title:'En Racha', desc:'5 días seguidos estudiando', icon:'🔥', condition: s => s.streak >= 5, points:75},
+  {id:'half_way', title:'A Mitad de Camino', desc:'Completa 40 temas', icon:'🗺️', condition: s => s.completed.length >= 40, points:300},
+  {id:'expert', title:'UNITY EXPERT', desc:'Completa TODOS los temas', icon:'🚀', condition: s => s.completed.length >= 82, points:1000},
+];
+
+function checkAchievements() {
+  let newAchievements = false;
+  ACHIEVEMENTS_DEF.forEach(a => {
+    if (!state.achievements.includes(a.id) && a.condition(state)) {
+      state.achievements.push(a.id);
+      state.igorPoints += a.points;
+      newAchievements = true;
+      showAchievementToast(a);
+    }
+  });
+  if (newAchievements) {
+    localStorage.setItem('iu_achievements', JSON.stringify(state.achievements));
+    localStorage.setItem('iu_points', state.igorPoints);
+    updateUI();
+  }
+}
+
+function showAchievementToast(a) {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:80px;right:24px;background:var(--panel);border:1px solid var(--unity);border-radius:var(--r2);padding:16px 20px;z-index:9999;max-width:280px;animation:slideIn .4s ease`;
+  t.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--unity);margin-bottom:4px;letter-spacing:1px">🏅 LOGRO DESBLOQUEADO</div><div style="display:flex;align-items:center;gap:10px"><span style="font-size:28px">${a.icon}</span><div><div style="font-family:var(--head);font-size:15px;font-weight:700;color:var(--text)">${a.title}</div><div style="font-size:12px;color:var(--text2)">${a.desc}</div>${a.points>0?`<div style="font-family:var(--mono);font-size:11px;color:var(--gold);margin-top:2px">+${a.points} IP</div>`:''}</div></div>`;
+  document.body.appendChild(t);
+  launchConfetti();
+  setTimeout(() => t.remove(), 4000);
+}
+
+// ── GITHUB RELEASES FETCH ──
+async function loadReleases() {
+  const container = document.getElementById('releasesContainer');
+  if (!container) return;
+  try {
+    const res = await fetch('https://api.github.com/repos/igorhermoso1/Unity2025_formaci-n/releases');
+    const releases = await res.json();
+    if (!Array.isArray(releases) || releases.length === 0) {
+      container.innerHTML = '<p style="color:var(--text3);font-family:var(--mono);font-size:12px">No se encontraron releases públicas.</p>';
+      return;
+    }
+    const allAssets = releases.flatMap(r => r.assets.map(a => ({...a, release_name: r.name, release_tag: r.tag_name})));
+    const videos = allAssets.filter(a => a.name.match(/\.(mkv|mp4|mov)$/i));
+    const zips = allAssets.filter(a => a.name.match(/\.zip$/i));
+    container.innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button onclick="filterAssets('all')" id="fa-all" style="background:var(--unity);color:#000;font-family:var(--mono);font-size:11px;padding:5px 12px;border:none;border-radius:3px;cursor:pointer">TODOS (${allAssets.length})</button>
+        <button onclick="filterAssets('video')" id="fa-video" style="background:var(--bg4);color:var(--text2);font-family:var(--mono);font-size:11px;padding:5px 12px;border:1px solid var(--border);border-radius:3px;cursor:pointer">🎬 VÍDEOS (${videos.length})</button>
+        <button onclick="filterAssets('zip')" id="fa-zip" style="background:var(--bg4);color:var(--text2);font-family:var(--mono);font-size:11px;padding:5px 12px;border:1px solid var(--border);border-radius:3px;cursor:pointer">📦 PROYECTOS (${zips.length})</button>
+      </div>
+      <div id="assetsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+        ${allAssets.map(a => {
+          const isVideo = a.name.match(/\.(mkv|mp4|mov)$/i);
+          const isZip = a.name.match(/\.zip$/i);
+          const icon = isVideo ? '🎬' : isZip ? '📦' : '📄';
+          const color = isVideo ? '#ef4444' : isZip ? '#f59e0b' : '#38bdf8';
+          const size = (a.size / 1048576).toFixed(1);
+          return `<div data-type="${isVideo?'video':isZip?'zip':'other'}" style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;gap:10px;align-items:flex-start">
+            <span style="font-size:22px;flex-shrink:0">${icon}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:3px;word-break:break-word">${a.name}</div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">${size} MB · ${a.release_tag}</div>
+              <a href="${a.browser_download_url}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:${color}22;color:${color};border:1px solid ${color}44;border-radius:3px;padding:4px 10px;font-family:var(--mono);font-size:10px;text-decoration:none;transition:all .15s">⬇ Descargar</a>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+  } catch(e) {
+    container.innerHTML = `<p style="color:var(--text3);font-family:var(--mono);font-size:12px">Error al cargar las releases. Asegúrate de que el repositorio es público.</p>`;
+  }
+}
+
+function filterAssets(type) {
+  document.querySelectorAll('#assetsGrid > div').forEach(el => {
+    el.style.display = (type === 'all' || el.dataset.type === type) ? '' : 'none';
+  });
+  document.querySelectorAll('[id^="fa-"]').forEach(b => {
+    b.style.background = 'var(--bg4)'; b.style.color = 'var(--text2)'; b.style.border = '1px solid var(--border)';
+  });
+  const active = document.getElementById('fa-'+type);
+  if (active) { active.style.background = 'var(--unity)'; active.style.color = '#000'; active.style.border = 'none'; }
+}
+
+// ── INIT ──
+function init() {
+  updateUI();
+  setTimeout(() => { document.querySelector('.xp-fill').style.width = Math.min(state.xp % 100, 100) + '%'; }, 300);
+  initFadeIn();
+  document.querySelectorAll('.nav-section-header')[0].click();
+  checkStreak();
+}
+
+function checkStreak() {
+  const today = new Date().toDateString();
+  const lastVisit = localStorage.getItem('iu_last_visit');
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (lastVisit === today) return;
+  if (lastVisit === yesterday) {
+    state.streak++;
+  } else if (lastVisit !== today) {
+    state.streak = 1;
+  }
+  localStorage.setItem('iu_streak', state.streak);
+  localStorage.setItem('iu_last_visit', today);
+  updateUI();
+}
+
+function updateUI() {
+  document.getElementById('igPts').textContent = '⭐ ' + state.igorPoints + ' IP';
+  document.getElementById('xpNum').textContent = (state.xp % 100) + '/100';
+  document.getElementById('s1').textContent = state.completed.length;
+  document.getElementById('s2').textContent = state.igorPoints;
+  document.getElementById('s3').textContent = state.achievements.length;
+  document.getElementById('s4').textContent = state.streak;
+  document.getElementById('s5').textContent = Math.round(state.completed.length / 82 * 100) + '%';
+  // Mark completed nav items
+  state.completed.forEach(id => {
+    const navItem = document.querySelector(`.nav-item[href="#${id}"]`);
+    if (navItem) navItem.classList.add('done');
+  });
+}
+
+// ── SIDEBAR ──
+function toggleNav(header) {
+  const items = header.nextElementSibling;
+  const isOpen = items.classList.contains('open');
+  items.classList.toggle('open', !isOpen);
+  header.classList.toggle('open', !isOpen);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function filterNav(q) {
+  const lower = q.toLowerCase();
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const txt = item.textContent.toLowerCase();
+    item.style.display = txt.includes(lower) ? '' : 'none';
+    if (txt.includes(lower) && lower.length > 0) {
+      item.closest('.nav-items').classList.add('open');
+      item.closest('.nav-section').querySelector('.nav-section-header').classList.add('open');
+    }
+  });
+}
+
+function scrollToSection(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── SIMULATORS — HTML only, logic called via initSimulator() after DOM insert ──
+function getSimulatorHTML(type) {
+  if (type === 'editor-sim') return `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px">
+      <div style="background:#1a1d2e;padding:6px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;gap:16px">
+        <span style="color:var(--unity)">▶ Hierarchy</span><span>Scene</span><span>Inspector</span><span>Project</span><span>Console</span>
+      </div>
+      <div style="display:grid;grid-template-columns:180px 1fr 160px;height:200px">
+        <div style="border-right:1px solid var(--border);padding:8px;font-family:var(--mono);font-size:11px">
+          <div style="color:var(--text3);margin-bottom:6px;font-size:10px">HIERARCHY</div>
+          <div id="sim-hier" style="display:flex;flex-direction:column;gap:3px">
+            <div onclick="selectObj('MainCamera')" style="cursor:pointer;color:#38bdf8;padding:3px 6px;border-radius:3px;font-size:11px">📷 Main Camera</div>
+            <div onclick="selectObj('DirectionalLight')" style="cursor:pointer;color:var(--text2);padding:3px 6px;border-radius:3px;font-size:11px">💡 Directional Light</div>
+            <div onclick="selectObj('Cube')" id="cubeNode" style="cursor:pointer;color:var(--text2);padding:3px 6px;border-radius:3px;font-size:11px;border:1px solid transparent">📦 Cube</div>
+          </div>
+          <button onclick="addObject()" style="margin-top:10px;background:var(--unity-dim);border:1px solid rgba(61,220,132,0.3);border-radius:3px;padding:4px 8px;color:var(--unity);font-family:var(--mono);font-size:10px;cursor:pointer;width:100%">+ Add Object</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;background:var(--bg3);position:relative;overflow:hidden">
+          <canvas id="sceneCanvas" width="300" height="180" style="cursor:grab"></canvas>
+          <div style="position:absolute;bottom:6px;left:6px;font-family:var(--mono);font-size:9px;color:var(--text3)">Scene View — arrastra para orbitar</div>
+        </div>
+        <div style="border-left:1px solid var(--border);padding:8px;font-family:var(--mono);font-size:11px">
+          <div style="color:var(--text3);margin-bottom:6px;font-size:10px">INSPECTOR</div>
+          <div id="sim-inspector" style="font-size:11px;color:var(--text2)">Selecciona un objeto</div>
+        </div>
+      </div>
+    </div>`;
+
+  if (type === 'lerp-sim') return `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--unity);margin-bottom:12px">// SIMULADOR — Vector3.Lerp</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <label style="font-size:12px;color:var(--text2);min-width:60px">Velocidad</label>
+        <input type="range" id="lerpSpeed" min="1" max="20" value="5" style="flex:1">
+        <span id="lerpSpeedVal" style="font-family:var(--mono);font-size:12px;color:var(--unity);min-width:20px">5</span>
+      </div>
+      <canvas id="lerpCanvas" width="400" height="80" style="width:100%;height:80px;border:1px solid var(--border);border-radius:3px;display:block"></canvas>
+      <div style="display:flex;justify-content:space-between;margin-top:8px">
+        <button onclick="resetLerp()" style="background:var(--unity-dim);border:1px solid rgba(61,220,132,0.3);color:var(--unity);font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:3px;cursor:pointer">↺ Reset</button>
+        <span id="lerpPos" style="font-family:var(--mono);font-size:11px;color:var(--text3)">pos: 0.000</span>
+      </div>
+    </div>`;
+
+  if (type === 'lifecycle-sim') return `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--unity);margin-bottom:12px">// SIMULADOR — Ciclo de vida MonoBehaviour</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <button onclick="simLifecycle('start')" style="background:var(--unity);color:#000;font-family:var(--mono);font-size:11px;padding:6px 14px;border:none;border-radius:3px;cursor:pointer">▶ Play</button>
+        <button onclick="simLifecycle('enable')" style="background:var(--bg4);color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 14px;border:1px solid var(--border);border-radius:3px;cursor:pointer">Enable</button>
+        <button onclick="simLifecycle('disable')" style="background:var(--bg4);color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 14px;border:1px solid var(--border);border-radius:3px;cursor:pointer">Disable</button>
+        <button onclick="simLifecycle('destroy')" style="background:rgba(239,68,68,0.2);color:#ef4444;font-family:var(--mono);font-size:11px;padding:6px 14px;border:1px solid rgba(239,68,68,0.3);border-radius:3px;cursor:pointer">Destroy</button>
+      </div>
+      <div id="lifecycleLog" style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px;font-family:var(--mono);font-size:11px;height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:3px">
+        <span style="color:var(--text3)">// Pulsa ▶ Play para empezar...</span>
+      </div>
+    </div>`;
+
+  return '';
+}
+
+// ── SIMULATOR LOGIC — called after HTML is injected into DOM ──
+function initSimulator(type) {
+  if (type === 'editor-sim') {
+    const canvas = document.getElementById('sceneCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let rot = 0, dragging = false, lastX = 0;
+    window._editorSelected = null;
+
+    function drawScene() {
+      ctx.clearRect(0,0,300,180);
+      ctx.fillStyle = '#1c1f2e'; ctx.fillRect(0,0,300,180);
+      ctx.strokeStyle = 'rgba(61,220,132,0.08)'; ctx.lineWidth = 0.5;
+      for (let i=0;i<300;i+=20) { ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,180);ctx.stroke(); }
+      for (let i=0;i<180;i+=20) { ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(300,i);ctx.stroke(); }
+      const cx=150, cy=80, s=40;
+      const cos=Math.cos(rot), sin=Math.sin(rot);
+      const pts=[[-s,-s],[s,-s],[s,s],[-s,s]].map(([x,y])=>([cx+x*cos, cy+x*sin*0.4+y]));
+      const sel = window._editorSelected === 'Cube';
+      ctx.fillStyle = sel ? 'rgba(61,220,132,0.4)' : 'rgba(61,220,132,0.15)';
+      ctx.beginPath(); pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y)); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = sel ? '#3ddc84' : 'rgba(61,220,132,0.5)'; ctx.lineWidth = sel ? 2 : 1; ctx.stroke();
+      ctx.fillStyle = '#ffd700'; ctx.beginPath(); ctx.arc(240,30,6,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#38bdf8'; ctx.fillRect(30,25,14,10);
+    }
+    canvas.onmousedown = e => { dragging=true; lastX=e.offsetX; canvas.style.cursor='grabbing'; };
+    canvas.onmouseup = () => { dragging=false; canvas.style.cursor='grab'; };
+    canvas.onmousemove = e => { if (dragging) { rot+=(e.offsetX-lastX)*0.01; lastX=e.offsetX; drawScene(); } };
+    canvas.onclick = e => { if (Math.abs(e.offsetX-150)<40 && Math.abs(e.offsetY-80)<40) selectObj('Cube'); };
+    setInterval(() => { if (!dragging) { rot+=0.005; drawScene(); } }, 50);
+    drawScene();
+  }
+
+  if (type === 'lerp-sim') {
+    const c = document.getElementById('lerpCanvas');
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    let lerpPos = 0;
+    const W = 400;
+    const spSlider = document.getElementById('lerpSpeed');
+    if (spSlider) spSlider.oninput = () => { document.getElementById('lerpSpeedVal').textContent = spSlider.value; };
+    window.resetLerp = () => { lerpPos = 0; };
+    function drawLerp() {
+      ctx.clearRect(0,0,W,80);
+      ctx.fillStyle='#1c1f2e'; ctx.fillRect(0,0,W,80);
+      ctx.fillStyle='#2a2d42'; ctx.fillRect(20,35,W-40,10);
+      ctx.fillStyle='#38bdf8'; ctx.beginPath(); ctx.arc(20,40,8,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#555'; ctx.font='9px monospace'; ctx.fillText('A',16,43);
+      ctx.fillStyle='#ef4444'; ctx.beginPath(); ctx.arc(W-20,40,8,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#555'; ctx.fillText('B',W-24,43);
+      const bx = 20 + lerpPos*(W-40);
+      ctx.fillStyle='#3ddc84'; ctx.beginPath(); ctx.arc(bx,40,12,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#000'; ctx.font='bold 10px monospace'; ctx.fillText(lerpPos.toFixed(2),bx-12,43);
+      const posEl = document.getElementById('lerpPos');
+      if (posEl) posEl.textContent = 'pos: '+lerpPos.toFixed(3);
+    }
+    function loopLerp() {
+      if (lerpPos < 0.999) {
+        const sp = spSlider ? parseFloat(spSlider.value) : 5;
+        lerpPos += (1 - lerpPos) * sp * 0.016;
+      }
+      drawLerp();
+      requestAnimationFrame(loopLerp);
+    }
+    loopLerp();
+  }
+
+  if (type === 'lifecycle-sim') {
+    let lcFrame = 0, lcInterval = null;
+    const lcColors = {Awake:'#ef4444',OnEnable:'#f97316',Start:'#f59e0b',Update:'#3ddc84',FixedUpdate:'#38bdf8',LateUpdate:'#a78bfa',OnDisable:'#6b7280',OnDestroy:'#ef4444'};
+    window.lcLog = function(method, msg) {
+      const log = document.getElementById('lifecycleLog');
+      if (!log) return;
+      const d = document.createElement('div');
+      const color = lcColors[method] || '#9ca3af';
+      d.innerHTML = '<span style="color:'+color+'">'+method+'()</span> <span style="color:var(--text3);font-size:10px">'+msg+'</span>';
+      log.appendChild(d); log.scrollTop = log.scrollHeight;
+    };
+    window.simLifecycle = function(action) {
+      const log = document.getElementById('lifecycleLog');
+      if (!log) return;
+      if (action === 'start') {
+        log.innerHTML = ''; lcFrame = 0;
+        if (lcInterval) clearInterval(lcInterval);
+        window.lcLog('Awake','Referenciando componentes...');
+        setTimeout(() => window.lcLog('OnEnable','Objeto activado'), 300);
+        setTimeout(() => window.lcLog('Start','Inicializando variables'), 600);
+        setTimeout(() => {
+          lcInterval = setInterval(() => {
+            lcFrame++;
+            window.lcLog('Update','Frame #'+lcFrame);
+            if (lcFrame % 3 === 0) window.lcLog('FixedUpdate','Physics step');
+            window.lcLog('LateUpdate','Cámara actualizada');
+            if (lcFrame >= 8) clearInterval(lcInterval);
+          }, 400);
+        }, 900);
+      } else if (action === 'enable') {
+        window.lcLog('OnEnable','Objeto reactivado');
+      } else if (action === 'disable') {
+        if (lcInterval) clearInterval(lcInterval);
+        window.lcLog('OnDisable','Objeto desactivado — Update parado');
+      } else if (action === 'destroy') {
+        if (lcInterval) clearInterval(lcInterval);
+        window.lcLog('OnDisable','Desactivando...');
+        setTimeout(() => window.lcLog('OnDestroy','💀 Objeto destruido. Limpiando eventos...'), 300);
+      }
+    };
+  }
+}
+
+// ── selectObj / addObject — global helpers for editor-sim ──
+function selectObj(name) {
+  window._editorSelected = name;
+  document.querySelectorAll('#sim-hier > div').forEach(d => d.style.background = 'transparent');
+  const inspectorData = {
+    'Cube': '<div style="color:var(--text);font-size:12px;font-weight:500;margin-bottom:8px">📦 Cube</div><div style="color:var(--text3);font-size:10px;margin-bottom:6px">Transform</div><div style="display:flex;flex-direction:column;gap:4px;font-size:11px"><div>Pos: <span style="color:var(--unity)">0, 0, 0</span></div><div>Rot: <span style="color:var(--unity)">0, 0, 0</span></div><div>Scale: <span style="color:var(--unity)">1, 1, 1</span></div></div>',
+    'MainCamera': '<div style="color:var(--text);font-size:12px;font-weight:500;margin-bottom:8px">📷 Main Camera</div><div style="color:var(--text3);font-size:10px;margin-bottom:6px">Camera</div><div style="font-size:11px;color:var(--text2)">FOV: 60<br>Near: 0.3<br>Far: 1000</div>',
+    'DirectionalLight': '<div style="color:var(--text);font-size:12px;font-weight:500;margin-bottom:8px">💡 Directional Light</div><div style="font-size:11px;color:var(--text2)">Intensity: 1<br>Color: #FFE4B5</div>',
+  };
+  const el = document.getElementById('sim-inspector');
+  if (el) el.innerHTML = inspectorData[name] || 'Sin datos';
+}
+
+function addObject() {
+  const names = ['Sphere','Cylinder','Capsule','Plane'];
+  const n = names[Math.floor(Math.random()*names.length)];
+  const div = document.createElement('div');
+  div.onclick = () => selectObj(n);
+  div.style.cssText = 'cursor:pointer;color:var(--text2);padding:3px 6px;border-radius:3px;font-size:11px';
+  div.textContent = '⬡ ' + n;
+  const hier = document.getElementById('sim-hier');
+  if (hier) hier.appendChild(div);
+}
+
+// ── OPEN TOPIC ──
+function openTopic(id) {
+  const data = TOPICS[id];
+  if (!data) {
+    // Generic topic for non-expanded ones
+    document.getElementById('modalBody').innerHTML = `
+      <div style="text-align:center;padding:40px 20px">
+        <div style="font-size:48px;margin-bottom:16px">🚧</div>
+        <h2 style="font-family:var(--head);font-size:24px;letter-spacing:2px;color:var(--text);margin-bottom:8px">CONTENIDO EN DESARROLLO</h2>
+        <p style="color:var(--text2);font-size:14px">Este tema estará disponible próximamente.<br>Mientras tanto, explora los temas desbloqueados.</p>
+      </div>`;
+    document.getElementById('modalOverlay').classList.add('open');
+    return;
+  }
+
+  const simHTML = data.simulator ? getSimulatorHTML(data.simulator) : '';
+
+  document.getElementById('modalBody').innerHTML = `
+    <div style="margin-bottom:20px">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px">NIVEL ${data.nivel}</span>
+      <h2 style="font-family:var(--head);font-size:26px;font-weight:700;letter-spacing:2px;color:var(--text);margin:4px 0 8px">${data.title}</h2>
+      <p style="font-size:13px;color:var(--text2)">${data.desc}</p>
+    </div>
+
+    ${data.video ? `
+    <div style="margin-bottom:20px">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--red);margin-bottom:8px;letter-spacing:1px">🎬 VÍDEO DE CLASE — Igor</div>
+      <div style="aspect-ratio:16/9;border-radius:var(--r);overflow:hidden;background:var(--bg4)">
+        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${data.video}?rel=0&modestbranding=1" frameborder="0" allowfullscreen style="border:none;display:block"></iframe>
+      </div>
+    </div>` : ''}
+
+    <div style="margin-bottom:20px">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--blue);margin-bottom:10px;letter-spacing:1px">📖 TEORÍA</div>
+      ${data.theory}
+    </div>
+
+    ${simHTML ? `<div style="margin-bottom:20px"><div style="font-family:var(--mono);font-size:11px;color:var(--unity);margin-bottom:10px;letter-spacing:1px">🎮 SIMULADOR INTERACTIVO</div>${simHTML}</div>` : ''}
+
+    <div style="margin-bottom:20px">
+      <div style="font-family:var(--mono);font-size:11px;color:#a78bfa;margin-bottom:10px;letter-spacing:1px">✅ EJERCICIO</div>
+      ${data.exercise}
+    </div>
+
+    <div style="display:flex;gap:12px;padding-top:16px;border-top:1px solid var(--border)">
+      <button onclick="completeTopic('${id}', ${data.points})" id="completeBtn-${id}" style="background:${state.completed.includes(id)?'var(--bg4)':'var(--unity)'};color:${state.completed.includes(id)?'var(--text2)':'#000'};font-family:var(--head);font-size:14px;font-weight:700;letter-spacing:1px;padding:10px 24px;border:${state.completed.includes(id)?'1px solid var(--border)':'none'};border-radius:var(--r);cursor:pointer">
+        ${state.completed.includes(id) ? '✓ YA COMPLETADO' : '✓ COMPLETAR (+'+data.points+' IP)'}
+      </button>
+      <button onclick="closeModalDirect()" style="background:transparent;color:var(--text2);font-family:var(--body);font-size:14px;padding:10px 20px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer">Cerrar</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ── CHECK ANSWER ──
+function checkAnswer(btn, type) {
+  const parent = btn.parentElement;
+  parent.querySelectorAll('button').forEach(b => { b.disabled = true; b.style.opacity='0.6'; });
+  if (type === 'correct') {
+    btn.style.background = 'rgba(61,220,132,0.2)';
+    btn.style.borderColor = 'var(--unity)';
+    btn.style.color = 'var(--unity)';
+    btn.style.opacity = '1';
+    btn.textContent = '✓ ' + btn.textContent + ' — ¡Correcto!';
+    showToast('¡Correcto! +5 IP 🎯');
+    state.igorPoints += 5;
+    localStorage.setItem('iu_points', state.igorPoints);
+    updateUI();
+  } else {
+    btn.style.background = 'rgba(239,68,68,0.15)';
+    btn.style.borderColor = '#ef4444';
+    btn.style.color = '#ef4444';
+    btn.style.opacity = '1';
+    btn.textContent = '✗ ' + btn.textContent;
+    // Highlight correct answer
+    parent.querySelectorAll('button').forEach(b => {
+      if (b.onclick && b.onclick.toString().includes("'correct'")) {
+        b.style.background = 'rgba(61,220,132,0.2)';
+        b.style.borderColor = 'var(--unity)';
+        b.style.color = 'var(--unity)';
+        b.style.opacity = '1';
+      }
+    });
+  }
+}
+
+function completeTopic(id, points) {
+  if (!state.completed.includes(id)) {
+    state.completed.push(id);
+    state.igorPoints += points;
+    state.xp += points;
+    localStorage.setItem('iu_points', state.igorPoints);
+    localStorage.setItem('iu_xp', state.xp);
+    localStorage.setItem('iu_completed', JSON.stringify(state.completed));
+    updateUI();
+    document.querySelector('.xp-fill').style.width = Math.min(state.xp % 100, 100) + '%';
+    showToast(`+${points} IgorPoints! ⭐`);
+    launchConfetti();
+    checkAchievements();
+    // Update complete button
+    const btn = document.getElementById('completeBtn-'+id);
+    if (btn) { btn.textContent = '✓ YA COMPLETADO'; btn.style.background='var(--bg4)'; btn.style.color='var(--text2)'; btn.style.border='1px solid var(--border)'; }
+  }
+}
+
+// ── VIDEO PLAYER ──
+function playVideo(videoId) {
+  document.getElementById('modalBody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <button onclick="openModal('videos')" style="background:var(--bg4);border:1px solid var(--border);border-radius:3px;padding:5px 10px;color:var(--text2);cursor:pointer;font-size:13px">← Volver</button>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">Vídeo de clase</span>
+    </div>
+    <div style="aspect-ratio:16/9;border-radius:var(--r);overflow:hidden;background:var(--bg4)">
+      <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0" frameborder="0" allowfullscreen allow="autoplay" style="border:none;display:block"></iframe>
+    </div>
+  `;
+}
+
+// ── MODAL ──
+function openModal(type) {
+  if (type === 'roadmap') {
+    document.getElementById('modalBody').innerHTML = `
+      <h2 style="font-family:var(--head);font-size:24px;letter-spacing:2px;margin-bottom:16px">🗺️ HOJA DE RUTA COMPLETA</h2>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:20px">82 temas organizados en 7 niveles progresivos. Completa cada nivel para desbloquear el siguiente.</p>
+      ${[
+        {n:0, icon:'🖥️', name:'El Editor', count:8, color:'#38bdf8', topics:['¿Qué es Unity?','Instalación y Hub','Interfaz','Scene View','Inspector','Project y Console','Organización','Git']},
+        {n:1, icon:'🧱', name:'GameObjects', count:7, color:'#a78bfa', topics:['GameObject y Transform','Componentes','Prefabs','Parenting','Materiales','Cámara y Luces','Primera Escena']},
+        {n:2, icon:'⚙️', name:'C# Scripting', count:14, color:'#3ddc84', topics:['Intro C#','Variables','Condicionales','Bucles','Métodos','Clases','Herencia','Interfaces','MonoBehaviour','GetComponent','Colecciones','Coroutines','Input','SerializeField']},
+        {n:3, icon:'🎮', name:'Movimiento', count:10, color:'#f59e0b', topics:['Vectores','Lerp','CharacterController','Rigidbody','Colisiones','Plataformas 2D','Top-Down','FPS','Física 2D','Raycast']},
+        {n:4, icon:'🎨', name:'Sistemas', count:15, color:'#f97316', topics:['Animator','Animation Clips','AudioSource','Canvas UI','Botones/TMP','Barras de vida','Partículas','Iluminación 2D','PostProcessing','DoTween','NavMesh','Tilemap','ProBuilder','SceneManagement','Cinemachine']},
+        {n:5, icon:'🔥', name:'Proyectos', count:12, color:'#ec4899', topics:['Combate Melee','Inventario RPG','IA Enemiga','NPC Completo','Diálogos','ScriptableObjects','Guardado','Procedural','Shooter','RPG','Plataformas','Horror']},
+        {n:6, icon:'🚀', name:'Experto', count:16, color:'#ef4444', topics:['Delegates','Action/Func','LINQ','Async/Await','Patrones','ShaderGraph','VFX Graph','Addressables','ECS/DOTS','Multiplayer','ML Agents','VR','Optimización','Editor Tools','Builds','Portfolio']},
+      ].map(level => `
+        <div style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;border-left:3px solid ${level.color}">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:20px">${level.icon}</span>
+            <span style="font-family:var(--head);font-size:15px;font-weight:700;letter-spacing:1px;color:${level.color}">NIVEL ${level.n} — ${level.name}</span>
+            <span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3)">${level.count} temas</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">
+            ${level.topics.map(t => `<span style="font-size:11px;font-family:var(--mono);color:var(--text3);background:var(--bg3);border:1px solid var(--border);padding:2px 7px;border-radius:3px">${t}</span>`).join('')}
+          </div>
+        </div>
+      `).join('')}
+    `;
+  } else if (type === 'videos') {
+    const videos = [
+      {id:'bhYQVgtLHY0', title:'Código — Introducción', nivel:'Nivel 2 · C# Scripting'},
+      {id:'oNHU653z7hk', title:'Clases en Unity', nivel:'Nivel 2 · POO'},
+      {id:'Zk4KAXJSOXg', title:'Animación 1', nivel:'Nivel 4 · Animator'},
+      {id:'yKQar_qQ5bY', title:'Animación 2', nivel:'Nivel 4 · Clips'},
+      {id:'bQCqwUfdLFc', title:'Animator 1', nivel:'Nivel 4 · Avanzado'},
+      {id:'1iuljF_PQGc', title:'AudioSource', nivel:'Nivel 4 · Audio'},
+      {id:'szXuwLNyG8U', title:'DoTween 1', nivel:'Nivel 4 · DoTween'},
+      {id:'UMX_aVVH80k', title:'DoTween 2', nivel:'Nivel 4 · Avanzado'},
+      {id:'PdGjst5-BEY', title:'Acumulador', nivel:'Nivel 2 · Lógica'},
+      {id:'Q1U-I1Bd-S8', title:'Agua, Niebla y Triggers', nivel:'Nivel 3 · Física'},
+    ];
+    document.getElementById('modalBody').innerHTML = `
+      <h2 style="font-family:var(--head);font-size:24px;letter-spacing:2px;margin-bottom:8px">🎬 VÍDEOS DE CLASE</h2>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:20px">Clases grabadas por Igor. Solo accesibles desde IGORUNITY.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        ${videos.map(v => `
+          <div onclick="playVideo('${v.id}')" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="aspect-ratio:16/9;background:var(--bg3);position:relative">
+              <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)">
+                <div style="width:40px;height:40px;border-radius:50%;background:rgba(61,220,132,0.9);display:flex;align-items:center;justify-content:center">
+                  <span style="color:#000;font-size:16px;margin-left:3px">▶</span>
+                </div>
+              </div>
+            </div>
+            <div style="padding:10px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--unity);margin-bottom:3px">${v.nivel}</div>
+              <div style="font-family:var(--head);font-size:13px;font-weight:600;color:var(--text)">${v.title}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else if (type === 'logros') {
+    document.getElementById('modalBody').innerHTML = `
+      <h2 style="font-family:var(--head);font-size:24px;letter-spacing:2px;margin-bottom:8px">🏆 LOGROS</h2>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:20px">${state.achievements.length}/${ACHIEVEMENTS_DEF.length} desbloqueados · ${state.igorPoints} IgorPoints totales</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        ${ACHIEVEMENTS_DEF.map(a => {
+          const unlocked = state.achievements.includes(a.id);
+          return `<div style="background:var(--bg4);border:1px solid ${unlocked?'rgba(61,220,132,0.3)':'var(--border)'};border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:14px;opacity:${unlocked?1:0.5}">
+            <span style="font-size:32px;${unlocked?'':'filter:grayscale(1)'}">${a.icon}</span>
+            <div style="flex:1">
+              <div style="font-family:var(--head);font-size:15px;font-weight:700;color:${unlocked?'var(--text)':'var(--text3)'}">${a.title}</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px">${a.desc}</div>
+            </div>
+            ${unlocked ? `<span style="font-family:var(--mono);font-size:11px;color:var(--unity)">✓ DESBLOQUEADO</span>` : `<span style="font-family:var(--mono);font-size:11px;color:var(--text3)">🔒</span>`}
+            ${a.points > 0 ? `<span style="font-family:var(--mono);font-size:11px;color:var(--gold)">+${a.points} IP</span>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  } else if (type === 'proyectos') {
+    document.getElementById('modalBody').innerHTML = `
+      <h2 style="font-family:var(--head);font-size:24px;letter-spacing:2px;margin-bottom:8px">📦 PROYECTOS Y ASSETS</h2>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:20px">91 assets del repositorio de Igor — vídeos y proyectos Unity descargables.</p>
+      <div id="releasesContainer" style="min-height:100px">
+        <div style="display:flex;align-items:center;gap:10px;color:var(--text3);font-family:var(--mono);font-size:12px">
+          <span>⟳</span> Cargando releases de GitHub...
+        </div>
+      </div>
+    `;
+    loadReleases();
+  }
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target.id === 'modalOverlay') closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function showSection(s) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  if (s === 'logros') openModal('logros');
+  if (s === 'proyectos') openModal('proyectos');
+  if (s === 'videos') openModal('videos');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:24px;right:24px;background:var(--unity);color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:12px 20px;border-radius:var(--r);z-index:9999;animation:slideIn .3s ease`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ── CONFETTI ──
+function launchConfetti() {
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('div');
+    const colors = ['#3ddc84','#7c3aed','#f59e0b','#38bdf8','#ef4444'];
+    p.style.cssText = `position:fixed;top:50%;left:${Math.random()*100}%;width:8px;height:8px;background:${colors[Math.floor(Math.random()*5)]};border-radius:2px;z-index:9999;pointer-events:none;animation:confettiFall ${1+Math.random()*2}s forwards`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 3000);
+  }
+}
+
+// ── FADE IN ON SCROLL ──
+function initFadeIn() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+}
+
+// ── COUNTER ANIMATION ──
+function animateCounters() {
+  document.querySelectorAll('.s-num').forEach(el => {
+    const target = parseInt(el.textContent) || 0;
+    if (target === 0) return;
+    let cur = 0;
+    const step = target / 30;
+    const timer = setInterval(() => {
+      cur = Math.min(cur + step, target);
+      el.textContent = Math.round(cur);
+      if (cur >= target) clearInterval(timer);
+    }, 40);
+  });
+}
+
+// ── CSS ANIMATIONS ──
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn { from { transform: translateX(40px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity:1; }
+    100% { transform: translateY(80vh) rotate(720deg); opacity:0; }
+  }
+`;
+document.head.appendChild(style);
+
+init();
+</script>
+</body>
+</html>
